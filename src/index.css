@@ -1,0 +1,185 @@
+:root{
+  --verde: #7ee0a1;
+  --verde-hover: #66d38f;
+  --rojo: #e74c3c;
+  --gris-bg: #f6f7f9;
+  --gris-borde: #e5e7eb;
+  --texto: #222;
+}
+
+*{ box-sizing:border-box }
+html,body,#root{ height:100% }
+body{
+  margin:0;
+  font-family: Segoe UI, Arial, sans-serif;
+  color: var(--texto);
+  background: var(--gris-bg);
+}
+
+.app{ display:flex; flex-direction:column; min-height:100% }
+
+/* ============ Header ============ */
+.header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; background:#fff; border-bottom:1px solid var(--gris-borde);
+  position:sticky; top:0; z-index:10;
+}
+.brand{ display:flex; align-items:center; gap:12px }
+.logo{ height:44px; width:44px; object-fit:contain }
+.title{ margin:0; font-size:26px; letter-spacing:.5px }
+.mesa-info{ display:flex; align-items:center; gap:8px; font-size:16px }
+.mesa-info strong{ font-size:18px }
+.right-controls{ display:flex; align-items:center; gap:12px }
+.role-select{ padding:8px 10px; border:1px solid var(--gris-borde); border-radius:8px; background:#fff }
+
+/* ============ Layout ============ */
+.content{
+  display:grid; grid-template-columns: 1fr 380px; gap:18px;
+  padding:16px 18px 96px; /* espacio para barra de mesas inferior */
+}
+.content.one-col{ grid-template-columns: 1fr }
+.content.cajero{ grid-template-columns: 1fr 380px }
+
+/* ============ Menú ============ */
+.menu{ background:#fff; border:1px solid var(--gris-borde); border-radius:14px; padding:14px }
+.cat-block{ border-bottom:1px dashed var(--gris-borde); padding:8px 4px }
+.cat-block:last-child{ border-bottom:none }
+
+.cat-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 12px; border-radius:10px; background:#f0fdf4; /* verde muy claro */
+}
+.cat-name{ font-weight:700; color:#14532d }
+.cat-toggle{
+  border:none; background:#e8f7ef; color:#14532d;
+  font-size:20px; line-height:1; width:36px; height:32px; border-radius:8px; cursor:pointer;
+}
+.cat-toggle:hover{ background:#d8f1e6 }
+
+.cat-items{ padding:6px 6px 10px }
+
+/* ============ Fila de producto ============ */
+.item-row{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:10px 12px; border:1px solid var(--gris-borde);
+  border-radius:10px; background:#fff; margin-top:8px;
+}
+.item-name{ font-weight:600; font-size:14px }
+
+/* Controles CH / N discretos, lado a lado */
+.dual-controls{ display:flex; gap:10px }
+.qty-box{
+  display:flex; align-items:center; gap:6px;
+  background:#fff; border-radius:8px; padding:2px 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.qty-box .label{
+  font-size:11px; font-weight:700; padding:1px 4px; border-radius:4px;
+  border:1px solid transparent;
+}
+.qty-box.ch .label{ background:#ffe6cc; color:#b34700; border-color:#ffa64d } /* CH */
+.qty-box.n  .label{ background:#e6ffe6; color:#006600; border-color:#66cc66 } /* N */
+
+.qty-box .num{ min-width:16px; text-align:center; font-weight:600; font-size:14px }
+
+/* Botones +/- sobrios */
+.qty-box button{
+  width:26px; height:26px; border:1px solid #d1d5db;
+  border-radius:6px; background:#f9fafb; color:#374151;
+  font-size:16px; cursor:pointer; transition: all .2s ease;
+}
+.qty-box button:hover{ background:#e5e7eb }
+
+/* ============ Ticket lateral ============ */
+.ticket{
+  background:#fff; border:1px solid var(--gris-borde); border-radius:14px; padding:14px;
+  position:sticky; top:74px; height:fit-content; max-height:calc(100vh - 120px); overflow:auto;
+}
+.ticket-head{ display:flex; justify-content:space-between; align-items:center }
+.ticket h3{ margin:6px 0 10px }
+.ticket-list{ list-style:none; padding:0; margin:0 }
+.ticket-row{ display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed var(--gris-borde) }
+.ticket-row:last-child{ border-bottom:none }
+.total-row{ display:flex; justify-content:space-between; margin-top:10px; font-size:18px }
+.ticket-actions{ margin-top:10px; display:flex; gap:10px }
+
+/* ============ Barra inferior de mesas ============ */
+.mesas-bar{
+  position:fixed; left:0; right:0; bottom:0; background:#fff; border-top:1px solid var(--gris-borde);
+  padding:10px 12px; display:grid; grid-template-columns: repeat(11, 1fr); gap:8px;
+}
+.mesa-square{
+  height:54px; border-radius:10px; border:1px solid var(--gris-borde);
+  font-weight:700; cursor:pointer;
+  transition: transform .12s, box-shadow .12s, background .12s, color .12s;
+}
+.mesa-square.libre{ background:var(--verde); color:#083d21 }
+.mesa-square.libre:hover{ background:var(--verde-hover) }
+.mesa-square.ocupada{ background:var(--rojo); color:#fff }
+.mesa-square.activa{ outline:2px solid #111; box-shadow:0 2px 8px rgba(0,0,0,.15) }
+
+/* ============ Cocinero / Cajero / Tarjetas ============ */
+.kitchen, .c-left{ background:#fff; border:1px solid var(--gris-borde); border-radius:14px; padding:14px }
+.k-card, .charge-card, .ticket-card{
+  border:1px solid var(--gris-borde); border-radius:12px; padding:12px; margin-bottom:12px; background:#fff
+}
+.k-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px }
+.k-list{ list-style:none; margin:0; padding:0 }
+.k-row{ display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed var(--gris-borde) }
+.k-row:last-child{ border-bottom:none }
+
+/* Chips de estado */
+.chip{ padding:4px 8px; border-radius:999px; font-size:12px; text-transform:uppercase }
+.chip.tomando{ background:#eef2ff; color:#3730a3 }
+.chip.enviado{ background:#fffbeb; color:#92400e }
+.chip.listo{ background:#ecfdf5; color:#065f46 }
+.chip.cobrado{ background:#f3f4f6; color:#111827 }
+
+/* Botones de acción */
+.btn-action{ border:none; border-radius:10px; padding:10px 12px; cursor:pointer; font-weight:700 }
+.btn-action.send{ background:#fde68a; color:#7c2d12 }   /* amarillo */
+.btn-action.done{ background:#bbf7d0; color:#065f46 }   /* verde suave */
+.btn-action.charge{ background:#dbeafe; color:#1e40af } /* azul suave */
+
+/* Cajero / Dashboard */
+.dash{ display:flex; gap:12px; margin:8px 0 14px }
+.dash-item{
+  flex:1; border:1px solid var(--gris-borde); border-radius:10px; padding:10px;
+  background:#f9fafb; display:flex; flex-direction:column; gap:4px
+}
+.tickets-list{ max-height:50vh; overflow:auto }
+.c-right{ background:#fff; border:1px solid var(--gris-borde); border-radius:14px; padding:14px; height:fit-content }
+
+/* ============ Admin & Auth ============ */
+.content.admin{ grid-template-columns: 1.1fr 0.9fr }
+.admin-left,.admin-right{ background:#fff; border:1px solid var(--gris-borde); border-radius:14px; padding:14px }
+.filters{ display:flex; gap:12px; margin:8px 0 12px }
+.panel{ border:1px solid var(--gris-borde); border-radius:12px; padding:10px; margin-top:12px; background:#f9fafb }
+
+.auth-backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.35);
+  display:flex; align-items:center; justify-content:center; z-index:50
+}
+.auth-modal{
+  width:320px; background:#fff; border:1px solid var(--gris-borde); border-radius:12px;
+  padding:14px; box-shadow:0 10px 30px rgba(0,0,0,.2)
+}
+.auth-modal h3{ margin:0 0 10px }
+.auth-modal input{ width:100%; padding:10px; border:1px solid var(--gris-borde); border-radius:8px }
+.auth-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:10px }
+
+.muted{ color:#6b7280 }
+
+/* ============ Responsive ============ */
+@media (max-width: 860px){
+  .content{ grid-template-columns: 1fr; padding: 8px 12px 96px }
+  .menu{ max-height: calc(100vh - 210px); overflow:auto }
+  .ticket{ max-height: unset; position:static; }
+  .header{ padding:10px 12px }
+  .title{ font-size:20px }
+  .mesas-bar{
+    position:fixed; bottom:0; left:0; right:0;
+    display:grid; grid-template-columns: repeat(5, 1fr); gap:8px;
+  }
+  .mesa-square{ height:48px; font-size:14px }
+}

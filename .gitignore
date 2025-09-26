@@ -1,0 +1,10 @@
+# Node / Vite
+node_modules/
+dist/
+.vscode/
+.DS_Store
+
+# Vercel / env
+.vercel/
+.env
+.env.*

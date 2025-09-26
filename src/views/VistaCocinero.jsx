@@ -1,0 +1,50 @@
+// src/views/VistaCocinero.jsx
+import React, { useMemo } from "react";
+
+export default function VistaCocinero({
+  MESAS_TOTAL, pedidosPorMesa, ensureMesa,
+  pendientesMesa, estadoMesa, notasPorMesa,
+  marcarListo,
+}) {
+  const mesas = useMemo(
+    () => Array.from({length:MESAS_TOTAL},(_,i)=>i+1)
+      .filter(n => ensureMesa(pedidosPorMesa[n]).sent && Object.keys(ensureMesa(pedidosPorMesa[n]).sent).length>0),
+    [MESAS_TOTAL, pedidosPorMesa, ensureMesa]
+  );
+
+  return (
+    <div className="content one-col">
+      <div className="kitchen">
+        <h2>Pedidos en Cocina</h2>
+        {mesas.length===0 ? <p className="muted">No hay pedidos pendientes.</p> : (
+          mesas.map((n)=>{
+            const m = ensureMesa(pedidosPorMesa[n]);
+            const pend = pendientesMesa(n);
+            const estado = estadoMesa[n] || "enviado";
+            const notaVisible = (m.nota ?? notasPorMesa[n] ?? "").trim();
+            return (
+              <div key={n} className="k-card">
+                <div className="k-head"><strong>Mesa #{n}</strong><span className={`chip ${estado}`}>{estado}</span></div>
+                {pend.length===0 ? <p className="muted">Todo listo.</p> : (
+                  <ul className="k-list">
+                    {pend.map((it)=>(
+                      <li key={it.nombre} className="k-row">
+                        <span>{it.nombre}</span><strong>x{it.cantidad}</strong>
+                        <button className="btn-action done" onClick={()=>marcarListo(n,it.nombre,it.cantidad)}>Marcar LISTO</button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {notaVisible && (
+                  <div style={{marginTop:8, padding:"8px 10px", border:"1px dashed #cbd5e1", borderRadius:8, background:"#f8fafc"}}>
+                    <strong>Nota:</strong> <span style={{color:"#334155"}}>{notaVisible}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
