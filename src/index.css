@@ -99,21 +99,46 @@ body { margin: 0; font-family: Segoe UI, Arial, sans-serif; color: var(--texto);
 .ticket-actions{ margin-top:10px; display:flex; gap:10px; }
 
 /* ====== Barra de mesas (FIJA) ====== */
+/* ====== Barra de mesas (scroll horizontal) ====== */
 .mesas-bar{
-  position: fixed; left:0; right:0; bottom:0;
-  background:#fff; border-top:1px solid var(--gris-borde);
-  padding:10px 12px; display:grid; grid-template-columns: repeat(11, 1fr); gap:8px;
-  height: var(--mesas-h); z-index: 40;
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: #fff;
+  border-top: 1px solid var(--gris-borde);
+  height: var(--mesas-h);
+  padding: 10px 12px;
+
+  /* Clave para scrollear lateral */
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;        /* permite desplazamiento horizontal */
+  overflow-y: hidden;
+  white-space: nowrap;     /* que no haga salto de línea */
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch; /* scroll suave en móviles */
+  z-index: 40;
   box-shadow: 0 -4px 12px rgba(0,0,0,.05);
 }
+/* cada mesa ocupa ancho fijo y no se encoge */
 .mesa-square{
-  height:54px; border-radius:10px; border:1px solid var(--gris-borde);
-  font-weight:700; cursor:pointer; transition: transform .12s, box-shadow .12s, background .12s, color .12s;
+  flex: 0 0 72px;          /* ancho fijo (ajústalo a gusto) */
+  height: 54px;
+  border-radius: 10px;
+  border: 1px solid var(--gris-borde);
+  font-weight: 700;
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: transform .12s, box-shadow .12s, background .12s, color .12s;
 }
 .mesa-square.libre{ background:var(--verde); color:#083d21; }
 .mesa-square.libre:hover{ background:var(--verde-hover); }
 .mesa-square.ocupada{ background:var(--rojo); color:#fff; }
 .mesa-square.activa{ outline:2px solid #111; box-shadow:0 2px 8px rgba(0,0,0,.15); }
+
+/* (opcional) estilo de scrollbar fino */
+.mesas-bar::-webkit-scrollbar{ height: 6px; }
+.mesas-bar::-webkit-scrollbar-track{ background: transparent; }
+.mesas-bar::-webkit-scrollbar-thumb{ background: #e5e7eb; border-radius: 999px; }
 
 /* ====== Cocinero / Cajero ====== */
 .content.one-col{ grid-template-columns: 1fr; }
