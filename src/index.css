@@ -202,3 +202,49 @@ body { margin: 0; font-family: Segoe UI, Arial, sans-serif; color: var(--texto);
   .mesas-bar { height: var(--mesas-h); }
   .mesa-square { min-width: 60px; height: 44px; font-size: 14px; }
 }
+/* Cajero layout */
+.content.cajero.one-col { grid-template-columns: 1fr; }
+.cajero-title { margin: 4px 0 10px; }
+.cajero-subtitle { margin: 10px 0 12px; }
+.cajero-dash .dash-item {
+  background: #f8fafc;
+  border: 1px solid var(--gris-borde);
+  border-radius: 12px;
+}
+
+/* Grid de tarjetas abajo */
+.charge-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap:14px;
+}
+
+/* Tarjeta estilizada */
+.charge-card.pretty{
+  background:#fff;
+  border:1px solid var(--gris-borde);
+  border-radius:16px;
+  padding:12px;
+  box-shadow:0 4px 14px rgba(0,0,0,.05);
+}
+.mesa-title{ display:flex; gap:6px; align-items:center; font-size:16px; }
+.it-name em{ font-style:normal; opacity:.7; }
+.divider{ height:1px; background:#eef2f7; margin:8px 0; }
+.total-row.strong{ font-size:18px; }
+
+/* Botón de cobro */
+.btn-pay{
+  margin-top:10px; width:100%; padding:12px 14px;
+  border:none; border-radius:12px; font-weight:800;
+  background:linear-gradient(180deg,#34d399,#10b981);
+  color:#083d21; cursor:pointer;
+  box-shadow:0 6px 16px rgba(16,185,129,.25);
+  transition:transform .06s, box-shadow .12s, opacity .12s;
+}
+.btn-pay:hover{ transform:translateY(-1px); box-shadow:0 8px 18px rgba(16,185,129,.3); }
+.btn-pay:active{ transform:translateY(0); opacity:.9; }
+
+/* Responsive */
+@media (max-width: 860px){
+  .content.cajero.one-col{ grid-template-columns:1fr; }
+}
