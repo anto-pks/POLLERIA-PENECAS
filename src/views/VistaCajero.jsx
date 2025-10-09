@@ -1,12 +1,17 @@
-// src/views/VistaCajero.jsx
 import React, { useMemo } from "react";
 
 export default function VistaCajero({
   MESAS_TOTAL, pedidosPorMesa, ensureMesa, estadoMesa,
   cobrarMesa, notasPorMesa, ventasDia, bizKey,
+  TAKEAWAY_BASE, isTakeawayId,
 }) {
   const abiertas = useMemo(
     () => Array.from({ length: MESAS_TOTAL }, (_, i) => i + 1)
+      .concat( // incluir pedidos LLEVAR que existan en memoria
+        Object.keys(pedidosPorMesa)
+          .map(Number)
+          .filter(id => isTakeawayId(id))
+      )
       .filter(n => {
         const m = ensureMesa(pedidosPorMesa[n]);
         return m.sent && Object.keys(m.sent).length > 0;
@@ -19,9 +24,11 @@ export default function VistaCajero({
     [ventasDia]
   );
 
+  const etiquetaMesa = (id) =>
+    isTakeawayId(id) ? `LLEVAR ${id - TAKEAWAY_BASE}` : `Mesa #${id}`;
+
   return (
     <div className="content cajero one-col">
-      {/* === DASH ARRIBA === */}
       <div className="cajero-top panel">
         <h2 className="cajero-title">Dashboard del Día (negocio)</h2>
         <div className="dash cajero-dash">
@@ -39,7 +46,6 @@ export default function VistaCajero({
           </div>
         </div>
 
-        {/* Últimos tickets (opcional mantener) */}
         {ventasDia.length > 0 && (
           <>
             <h3 style={{ marginTop: 10 }}>Últimos tickets</h3>
@@ -47,7 +53,7 @@ export default function VistaCajero({
               {ventasDia.map((t) => (
                 <div key={t.id} className="ticket-card">
                   <div className="k-head">
-                    <strong>Mesa #{t.mesa}</strong>
+                    <strong>{etiquetaMesa(t.mesa)}</strong>
                     <span className="muted">{t.fecha}</span>
                   </div>
                   <ul className="k-list">
@@ -76,7 +82,6 @@ export default function VistaCajero({
         )}
       </div>
 
-      {/* === MESAS ABAJO (tarjetas) === */}
       <div className="cajero-bottom">
         <h2 className="cajero-subtitle">Mesas para Cobro</h2>
 
@@ -99,8 +104,7 @@ export default function VistaCajero({
                 <div key={n} className="charge-card pretty">
                   <div className="k-head">
                     <div className="mesa-title">
-                      <span>Mesa</span>
-                      <strong>#{n}</strong>
+                      <strong>{etiquetaMesa(n)}</strong>
                     </div>
                     <span className={`chip ${estado}`}>{estado}</span>
                   </div>

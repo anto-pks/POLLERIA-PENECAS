@@ -1,4 +1,3 @@
-// src/views/VistaMesero.jsx
 import React from "react";
 import ProductRow from "../components/ProductRow";
 
@@ -9,7 +8,13 @@ export default function VistaMesero({
   enviarACocina, totalSent,
   // nota
   notaInputRef, notasPorMesa, guardarNotaMesa,
+  // para llevar
+  isTakeawayId, TAKEAWAY_BASE,
 }) {
+  const etiqueta = isTakeawayId(mesaSel)
+    ? `LLEVAR ${mesaSel - TAKEAWAY_BASE}`
+    : `Mesa #${mesaSel}`;
+
   return (
     <div className="content">
       <div className="menu">
@@ -34,7 +39,7 @@ export default function VistaMesero({
 
       <aside className="ticket">
         <div className="ticket-head">
-          <h3>Pedido Mesa #{mesaSel}</h3>
+          <h3>Pedido {etiqueta}</h3>
           <span className={`chip ${estadoMesa[mesaSel] || "tomando"}`}>{estadoMesa[mesaSel] || "tomando"}</span>
         </div>
 
@@ -69,7 +74,7 @@ export default function VistaMesero({
           </>
         )}
 
-        {/* Nota por mesa: input NO controlado */}
+        {/* Nota por mesa */}
         <div style={{ marginTop: 12 }}>
           <label style={{fontSize:12, display:"block", marginBottom:6, color:"#374151"}}>
             Nota especial (opcional)
@@ -78,7 +83,7 @@ export default function VistaMesero({
             key={`nota-mesa-${mesaSel}`}
             ref={notaInputRef}
             type="text"
-            placeholder="Ej: presa pierna, ensalada aparte, sin vinagreta"
+            placeholder="Ej: para llevar, sin ensalada, etc."
             defaultValue={notasPorMesa[mesaSel] || ""}
             onBlur={(e)=>guardarNotaMesa(e.target.value)}
             style={{width:"100%", padding:"10px", border:"1px solid #e5e7eb", borderRadius:8}}

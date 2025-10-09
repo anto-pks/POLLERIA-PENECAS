@@ -1,4 +1,3 @@
-// src/PolleriaPOS.jsx
 import React from "react";
 import { CATS } from "./config/menuData";
 import { usePedidos } from "./hooks/usePedidos";
@@ -12,13 +11,19 @@ import VistaAdmin from "./views/VistaAdmin";
 export default function PolleriaPOS() {
   const h = usePedidos();
 
-  // Exponer setCant global para simplificar props profundas (solo Mesero->ProductRow)
-  // (Alternativa: prop-drilling; esto evita pasar 5 niveles)
+  // Exponer setCant global (para ProductRow)
   window.setCant = h.setCant;
 
   return (
     <div className="app">
-      <Header mesaSel={h.mesaSel} rol={h.rol} requestRole={h.requestRole} />
+      <Header
+        mesaSel={h.mesaSel}
+        rol={h.rol}
+        requestRole={h.requestRole}
+        isTakeawayId={h.isTakeawayId}
+        TAKEAWAY_BASE={h.TAKEAWAY_BASE}
+        createTakeaway={h.createTakeaway}
+      />
 
       {h.rol === "MESERO" && (
         <VistaMesero
@@ -34,6 +39,8 @@ export default function PolleriaPOS() {
           notaInputRef={h.notaInputRef}
           notasPorMesa={h.notasPorMesa}
           guardarNotaMesa={h.guardarNotaMesa}
+          isTakeawayId={h.isTakeawayId}
+          TAKEAWAY_BASE={h.TAKEAWAY_BASE}
         />
       )}
 
@@ -46,6 +53,8 @@ export default function PolleriaPOS() {
           estadoMesa={h.estadoMesa}
           notasPorMesa={h.notasPorMesa}
           marcarListo={h.marcarListo}
+          isTakeawayId={h.isTakeawayId}
+          TAKEAWAY_BASE={h.TAKEAWAY_BASE}
         />
       )}
 
@@ -59,6 +68,8 @@ export default function PolleriaPOS() {
           notasPorMesa={h.notasPorMesa}
           ventasDia={h.ventasDia}
           bizKey={h.bizKey}
+          isTakeawayId={h.isTakeawayId}
+          TAKEAWAY_BASE={h.TAKEAWAY_BASE}
         />
       )}
 
@@ -72,6 +83,7 @@ export default function PolleriaPOS() {
         />
       )}
 
+      {/* La barra de mesas sigue mostrando solo mesas físicas */}
       <MesaBar
         MESAS_TOTAL={h.MESAS_TOTAL}
         mesaSel={h.mesaSel}

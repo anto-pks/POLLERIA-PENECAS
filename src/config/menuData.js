@@ -105,4 +105,12 @@ export const CATS = [
       { nombre: "PORCION MOLLEJA", precio: 8 },
     ],
   },
+  {
+    key: "OTROS",
+    label: "OTROS",
+    items: [
+      { nombre: "TAPER", precio: 1 },
+      { nombre: "CREMA", precio: 1 },
+    ],
+  },
 ];

@@ -5,12 +5,17 @@ export default function VistaCocinero({
   MESAS_TOTAL, pedidosPorMesa, ensureMesa,
   pendientesMesa, estadoMesa, notasPorMesa,
   marcarListo,
+  TAKEAWAY_BASE, isTakeawayId,
 }) {
-  const mesas = useMemo(
-    () => Array.from({length:MESAS_TOTAL},(_,i)=>i+1)
-      .filter(n => ensureMesa(pedidosPorMesa[n]).sent && Object.keys(ensureMesa(pedidosPorMesa[n]).sent).length>0),
-    [MESAS_TOTAL, pedidosPorMesa, ensureMesa]
-  );
+  const mesas = useMemo(() => {
+    const mesasNum = Array.from({length:MESAS_TOTAL},(_,i)=>i+1);
+    const llevarIds = Object.keys(pedidosPorMesa).map(Number).filter(id => isTakeawayId(id));
+    return [...mesasNum, ...llevarIds]
+      .filter(n => ensureMesa(pedidosPorMesa[n]).sent && Object.keys(ensureMesa(pedidosPorMesa[n]).sent).length>0);
+  }, [MESAS_TOTAL, pedidosPorMesa, ensureMesa, isTakeawayId]);
+
+  const etiquetaMesa = (id) =>
+    isTakeawayId(id) ? `LLEVAR ${id - TAKEAWAY_BASE}` : `Mesa #${id}`;
 
   return (
     <div className="content one-col">
@@ -24,7 +29,10 @@ export default function VistaCocinero({
             const notaVisible = (m.nota ?? notasPorMesa[n] ?? "").trim();
             return (
               <div key={n} className="k-card">
-                <div className="k-head"><strong>Mesa #{n}</strong><span className={`chip ${estado}`}>{estado}</span></div>
+                <div className="k-head">
+                  <strong>{etiquetaMesa(n)}</strong>
+                  <span className={`chip ${estado}`}>{estado}</span>
+                </div>
                 {pend.length===0 ? <p className="muted">Todo listo.</p> : (
                   <ul className="k-list">
                     {pend.map((it)=>(
