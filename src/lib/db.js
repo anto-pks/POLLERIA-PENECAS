@@ -1,19 +1,14 @@
 // src/lib/db.js
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const url = import.meta.env.VITE_SUPABASE_URL;
+const anon = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error('❌ Faltan VITE_SUPABASE_URL o VITE_SUPABASE_ANON_KEY en variables de entorno.');
-}
-
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  realtime: { params: { eventsPerSecond: 10 } },
+export const supabase = createClient(url, anon, {
   auth: {
-    persistSession: true,
-    autoRefreshToken: true,
+    persistSession: true,         // guarda la sesión en localStorage
+    autoRefreshToken: true,       // refresca tokens automáticamente
     detectSessionInUrl: true,
   },
-  global: { headers: { 'x-client-info': 'polleria-pos' } },
+  realtime: { params: { eventsPerSecond: 10 } }
 });
