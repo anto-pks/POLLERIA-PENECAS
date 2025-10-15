@@ -1,11 +1,7 @@
 import React from "react";
 import { ROLES } from "../config/constants";
 
-export default function Header({ mesaSel, rol, requestRole, isTakeawayId, TAKEAWAY_BASE, createTakeaway }) {
-  const etiqueta = isTakeawayId(mesaSel)
-    ? `LLEVAR ${mesaSel - TAKEAWAY_BASE}`
-    : `MESA #${mesaSel}`;
-
+export default function Header({ mesaSel, rol, requestRole, crearParaLlevar }) {
   return (
     <header className="header">
       <div className="brand">
@@ -14,17 +10,13 @@ export default function Header({ mesaSel, rol, requestRole, isTakeawayId, TAKEAW
       </div>
 
       <div className="right-controls">
-        <div className="mesa-info"><span>{isTakeawayId(mesaSel) ? "" : "Mesa"}</span><strong>{etiqueta}</strong></div>
-
-        {/* Botón rápido para crear pedido “LLEVAR” */}
-        <button
-          className="btn-action"
-          style={{ background: "#dbeafe", color: "#1e40af" }}
-          onClick={createTakeaway}
-          title="Nuevo pedido para llevar"
-        >
-          Para llevar
+        <button className="carry-btn" onClick={crearParaLlevar} title="Crear pedido para llevar">
+          🛍️ Para llevar
         </button>
+
+        <div className="mesa-info">
+          <span>Mesa</span><strong>#{mesaSel}</strong>
+        </div>
 
         <select value={rol} onChange={(e)=>requestRole(e.target.value)} className="role-select" title="Cambiar rol">
           {ROLES.map((r)=><option key={r} value={r}>{r}</option>)}

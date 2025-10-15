@@ -248,3 +248,26 @@ body { margin: 0; font-family: Segoe UI, Arial, sans-serif; color: var(--texto);
 @media (max-width: 860px){
   .content.cajero.one-col{ grid-template-columns:1fr; }
 }
+/* Botón Para llevar: que nunca se oculte en móviles */
+.carry-btn{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--gris-borde);
+  border-radius: 8px;
+  background: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 860px){
+  .right-controls{ 
+    flex-wrap: wrap;            /* permite que baje a la línea siguiente */
+    row-gap: 6px;
+  }
+  .title{ flex: 1 1 auto; }     /* da espacio para que no tape al botón */
+  .carry-btn{ 
+    order: 2;                   /* si hace falta, que se mueva debajo */
+  }
+}

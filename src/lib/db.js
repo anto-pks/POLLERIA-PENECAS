@@ -1,19 +1,35 @@
 // src/lib/db.js
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const url = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+const anon = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error('❌ Faltan VITE_SUPABASE_URL o VITE_SUPABASE_ANON_KEY en variables de entorno.');
+if (!url || !anon) {
+  // No tumba la app; sólo loguea un error claro.
+  console.error('[Supabase] Variables faltantes.',
+    { hasUrl: !!url, hasAnon: !!anon }
+  );
 }
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  realtime: { params: { eventsPerSecond: 10 } },
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-  global: { headers: { 'x-client-info': 'polleria-pos' } },
-});
+// Si faltan variables, exportamos un cliente "nulo" que lanza errores claros al usarlo
+function makeGuardedClient() {
+  if (!url || !anon) {
+    return {
+      from() {
+        throw new Error(
+          '[Supabase] Falta VITE_SUPABASE_URL y/o VITE_SUPABASE_ANON_KEY en Vercel. ' +
+          'Define ambas variables y redeploy.'
+        );
+      },
+      channel() {
+        throw new Error('[Supabase] Cliente no inicializado por variables faltantes.');
+      },
+      removeChannel() {},
+    };
+  }
+  return createClient(url, anon, {
+    realtime: { params: { eventsPerSecond: 10 } },
+  });
+}
+
+export const supabase = makeGuardedClient();

@@ -31,16 +31,61 @@ export function usePedidos() {
   // Ventas día (local, para dashboard)
   const [ventasDia, setVentasDia] = useState([]);
   const [bizKey, setBizKey] = useState(ventasKey());
-  useEffect(() => {
-    const k = ventasKey();
-    setBizKey(k);
+  // dentro de useEffect de carga (src/hooks/usePedidos.js)
+useEffect(() => {
+  let unsubscribe;
+
+  async function loadMesaSafe() {
     try {
-      const raw = localStorage.getItem(k);
-      setVentasDia(raw ? JSON.parse(raw) : []);
-    } catch {
-      setVentasDia([]);
+      // 1) Items persistidos en DB
+      const snap = await getMesaSnapshot(mesaSel); // {sent:{}, ready:{}}
+
+      // 2) Estado/nota de la mesa
+      const mesa = await getMesaAbierta(mesaSel);
+
+      // 3) Estado local
+      setPedidosPorMesa((prev) => ({
+        ...prev,
+        [mesaSel]: {
+          draft: prev[mesaSel]?.draft || {},
+          sent: snap.sent || {},
+          ready: snap.ready || {},
+          nota: mesa?.nota ?? prev[mesaSel]?.nota ?? "",
+        },
+      }));
+
+      // 4) Estado de la mesa
+      if (mesa?.estado) {
+        setEstadoMesa((prev) => ({ ...prev, [mesaSel]: mesa.estado }));
+      }
+
+      // 5) Nota local
+      setNotasPorMesa((prev) => ({
+        ...prev,
+        [mesaSel]: mesa?.nota ?? prev[mesaSel] ?? "",
+      }));
+    } catch (err) {
+      console.error('[loadMesaSafe] Error cargando mesa', err);
+      // No crashea la UI: sólo deja la mesa en estado local.
+      setPedidosPorMesa((prev) => ({
+        ...prev,
+        [mesaSel]: prev[mesaSel] || { draft: {}, sent: {}, ready: {}, nota: "" },
+      }));
     }
-  }, []);
+  }
+
+  loadMesaSafe();
+  try {
+    unsubscribe = subscribeMesa(mesaSel, loadMesaSafe);
+  } catch (e) {
+    console.error('[subscribeMesa] Error', e);
+  }
+
+  return () => {
+    if (typeof unsubscribe === "function") unsubscribe();
+  };
+}, [mesaSel]);
+
   useEffect(() => {
     const k = ventasKey();
     setBizKey(k);
