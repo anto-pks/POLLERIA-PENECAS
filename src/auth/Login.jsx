@@ -1,98 +1,91 @@
-// src/auth/Login.jsx
 import React, { useState } from "react";
+import { supabase } from "../lib/db";
 
-export default function Login({ onLogin }) {
-  const [usuario, setUsuario] = useState("");
-  const [pass, setPass] = useState("");
-  const [busy, setBusy] = useState(false);
+const LOGIN_DOMAIN = "penecas.com";
 
-  const submit = async (e) => {
+export default function Login({ onLogged }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
+
+  async function handleLogin(e) {
     e.preventDefault();
+    setErr("");
+    setLoading(true);
     try {
-      setBusy(true);
-      const emailFicticio = `${usuario}@penecas.local`.toLowerCase().trim();
-      await onLogin({ email: emailFicticio, password: pass });
-    } catch (err) {
-      alert("Usuario o contraseña incorrecta");
+      const email = `${username.trim()}@${LOGIN_DOMAIN}`;
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+
+      const userId = data.user?.id;
+      if (!userId) throw new Error("No se obtuvo el usuario de la sesión.");
+
+      // Traer perfil
+      const { data: profile, error: pErr } = await supabase
+        .from("profiles")
+        .select("full_name, role, sucursal_id")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (pErr) throw pErr;
+
+      const role = profile?.role || "MESERO";
+      const sucursal_id = profile?.sucursal_id || "MATRIZ";
+
+      // Guardar en localStorage para mantener sesión/rol/sucursal
+      localStorage.setItem("ppos_role", role);
+      localStorage.setItem("ppos_sucursal", sucursal_id);
+
+      onLogged({ role, sucursal_id });
+    } catch (e) {
+      setErr("Usuario o clave incorrectos.");
+      // console.error("[LOGIN ERR]", e);
     } finally {
-      setBusy(false);
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "#f6f7f9",
-        padding: 16,
-      }}
-    >
-      <div
-        style={{
-          width: 340,
-          background: "#fff",
-          border: "1px solid #e5e7eb",
-          borderRadius: 14,
-          padding: 20,
-          boxShadow: "0 10px 30px rgba(0,0,0,.08)",
-        }}
-      >
-        <div style={{ textAlign: "center", marginBottom: 10 }}>
-          <img src="/logo.png" alt="Logo" style={{ width: 64, height: 64 }} />
-          <h2 style={{ margin: "8px 0 0", color: "#14532d" }}>Pollería Penecas</h2>
-          <div style={{ color: "#475569", fontSize: 14 }}>Inicio de Sesión</div>
+    <div className="login__wrap">
+      <div className="login__card">
+        <div className="login__brand">
+          <img src="/logo.png" alt="Penecas" />
+          <div>
+            <h1>Pollería Penecas</h1>
+            <p>Ingreso por usuario</p>
+          </div>
         </div>
-        <form onSubmit={submit}>
-          <label style={{ fontSize: 13, color: "#374151" }}>Usuario</label>
+
+        <form onSubmit={handleLogin} className="login__form">
+          <label>Usuario</label>
           <input
-            type="text"
-            value={usuario}
-            onChange={(e) => setUsuario(e.target.value)}
-            required
-            placeholder="Ej: mesero1"
-            style={{
-              width: "100%",
-              padding: 10,
-              border: "1px solid #e5e7eb",
-              borderRadius: 8,
-              marginBottom: 8,
-            }}
+            autoFocus
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="isamar"
           />
-          <label style={{ fontSize: 13, color: "#374151" }}>Contraseña</label>
+
+          <label>Clave</label>
           <input
             type="password"
-            value={pass}
-            onChange={(e) => setPass(e.target.value)}
-            required
-            placeholder="****"
-            style={{
-              width: "100%",
-              padding: 10,
-              border: "1px solid #e5e7eb",
-              borderRadius: 8,
-            }}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••"
           />
-          <button
-            type="submit"
-            disabled={busy}
-            style={{
-              marginTop: 12,
-              width: "100%",
-              padding: "12px 14px",
-              border: "none",
-              borderRadius: 12,
-              fontWeight: 800,
-              background: "linear-gradient(180deg,#34d399,#10b981)",
-              color: "#083d21",
-              cursor: "pointer",
-              boxShadow: "0 6px 16px rgba(16,185,129,.25)",
-            }}
-          >
-            {busy ? "Entrando..." : "Entrar"}
+
+          {err && <div className="login__error">{err}</div>}
+
+          <button className="btn btn--primary" disabled={loading}>
+            {loading ? "Ingresando..." : "Ingresar"}
           </button>
+
+          <div className="login__hint">
+            Se convierte en correo: <b>usuario@{LOGIN_DOMAIN}</b>
+          </div>
         </form>
       </div>
     </div>

@@ -134,7 +134,6 @@ export async function markReady(mesaId, nombre, variante, qty) {
 }
 
 /** Cobrar: inserta venta y limpia mesa */
-// src/lib/dbHelpers.js
 export async function cobrarMesaDB({ mesa, dateISO, fecha, items, total, nota }) {
   // 1️⃣ Guarda ticket en ventas
   await supabase.from("ventas").insert({
@@ -165,26 +164,22 @@ export async function listMesasAbiertas() {
   return data || [];
 }
 
-/** Realtime: escucha cambios en tabla mesas (alta/baja/cambio) */
+/** Realtime: escucha cualquier cambio en la tabla mesas (alta/baja/cambio) */
 export function subscribeMesas(onChange) {
   const ch = supabase.channel('mesas-all');
 
   ch.on(
     'postgres_changes',
     { event: '*', schema: 'public', table: 'mesas' },
-    (payload) => {
-      console.log("Evento realtime mesas:", payload.eventType, payload.old?.id);
-      try { onChange(payload); } catch (e) { console.error(e); }
-    }
+    () => { try { onChange(); } catch(e){ console.error(e); } }
   ).subscribe((status) => {
     if (status === 'SUBSCRIBED') {
-      try { onChange(); } catch (e) { console.error(e); }
+      try { onChange(); } catch(e){ console.error(e); }
     }
   });
 
   return () => supabase.removeChannel(ch);
 }
-
 
 /** Realtime: escucha una mesa (mesas + mesa_items) y dispara onChange */
 export function subscribeMesa(mesaId, onChange) {

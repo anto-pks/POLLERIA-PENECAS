@@ -1,4 +1,3 @@
-// src/views/VistaCocinero.jsx
 import React, { useMemo } from "react";
 
 export default function VistaCocinero({
@@ -56,3 +55,4 @@ export default function VistaCocinero({
     </div>
   );
 }
+

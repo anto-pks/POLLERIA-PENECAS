@@ -1,54 +1,24 @@
-// src/hooks/useAuth.js
-import { useEffect, useState } from "react";
-import { supabase } from "../lib/db";
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/db';
 
-export function useAuth() {
-  const [loading, setLoading] = useState(true);
+export default function useAuth() {
   const [session, setSession] = useState(null);
-  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
-
-    async function bootstrap() {
-      const { data } = await supabase.auth.getSession();
-      if (!mounted) return;
-      setSession(data.session || null);
-      if (data.session?.user) await loadProfile(data.session.user.id);
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session ?? null);
       setLoading(false);
-    }
-
-    async function loadProfile(userId) {
-      const { data: p } = await supabase
-        .from("profiles")
-        .select("id, full_name, role, sucursal_id")
-        .eq("id", userId)
-        .maybeSingle();
-      if (p) setProfile(p);
-    }
-
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, sess) => {
-      setSession(sess);
-      if (sess?.user) await loadProfile(sess.user.id);
-      else setProfile(null);
     });
 
-    bootstrap();
+    const { data: sub } = supabase.auth.onAuthStateChange((_evt, s) => {
+      setSession(s ?? null);
+    });
 
-    return () => {
-      mounted = false;
-      sub.subscription.unsubscribe();
-    };
+    return () => sub.subscription.unsubscribe();
   }, []);
 
-  const signIn = async ({ email, password }) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-  };
+  const signOut = () => supabase.auth.signOut();
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-  };
-
-  return { loading, session, profile, signIn, signOut };
+  return { session, user: session?.user ?? null, loading, signOut };
 }

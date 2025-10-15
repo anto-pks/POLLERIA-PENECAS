@@ -1,8 +1,4 @@
-// src/PolleriaPOS.jsx
 import React from "react";
-import { useAuth } from "./hooks/useAuth";
-import Login from "./auth/Login";
-
 import { CATS } from "./config/menuData";
 import { usePedidos } from "./hooks/usePedidos";
 import Header from "./components/Header";
@@ -13,22 +9,23 @@ import VistaCajero from "./views/VistaCajero";
 import VistaAdmin from "./views/VistaAdmin";
 
 export default function PolleriaPOS() {
-  const { loading, session, profile, signIn, signOut } = useAuth();
   const h = usePedidos();
 
-  // vincula perfil con la app (rol/sucursal) — sin romper lo que ya tenías
-  React.useEffect(() => {
-    if (profile?.role) h.setRol(profile.role); // fija rol desde perfil (ya no usa PIN)
-  }, [profile?.role]);
-
-  if (loading) return null; // pequeño skeleton si quieres
-  if (!session || !profile) return <Login onLogin={signIn} />;
+  // Exponer setCant global (para ProductRow)
+  window.setCant = h.setCant;
 
   return (
     <div className="app">
-      <Header mesaSel={h.mesaSel} profile={profile} onSignOut={signOut} />
+      <Header
+        mesaSel={h.mesaSel}
+        rol={h.rol}
+        requestRole={h.requestRole}
+        isTakeawayId={h.isTakeawayId}
+        TAKEAWAY_BASE={h.TAKEAWAY_BASE}
+        createTakeaway={h.createTakeaway}
+      />
 
-      {profile.role === "MESERO" && (
+      {h.rol === "MESERO" && (
         <VistaMesero
           CATS={CATS}
           abiertas={h.abiertas}
@@ -42,10 +39,12 @@ export default function PolleriaPOS() {
           notaInputRef={h.notaInputRef}
           notasPorMesa={h.notasPorMesa}
           guardarNotaMesa={h.guardarNotaMesa}
+          isTakeawayId={h.isTakeawayId}
+          TAKEAWAY_BASE={h.TAKEAWAY_BASE}
         />
       )}
 
-      {profile.role === "COCINERO" && (
+      {h.rol === "COCINERO" && (
         <VistaCocinero
           MESAS_TOTAL={h.MESAS_TOTAL}
           pedidosPorMesa={h.pedidosPorMesa}
@@ -54,10 +53,12 @@ export default function PolleriaPOS() {
           estadoMesa={h.estadoMesa}
           notasPorMesa={h.notasPorMesa}
           marcarListo={h.marcarListo}
+          isTakeawayId={h.isTakeawayId}
+          TAKEAWAY_BASE={h.TAKEAWAY_BASE}
         />
       )}
 
-      {profile.role === "CAJERO" && (
+      {h.rol === "CAJERO" && (
         <VistaCajero
           MESAS_TOTAL={h.MESAS_TOTAL}
           pedidosPorMesa={h.pedidosPorMesa}
@@ -67,10 +68,12 @@ export default function PolleriaPOS() {
           notasPorMesa={h.notasPorMesa}
           ventasDia={h.ventasDia}
           bizKey={h.bizKey}
+          isTakeawayId={h.isTakeawayId}
+          TAKEAWAY_BASE={h.TAKEAWAY_BASE}
         />
       )}
 
-      {profile.role === "ADMINISTRADOR" && (
+      {h.rol === "ADMINISTRADOR" && (
         <VistaAdmin
           ventasDia={h.ventasDia}
           bizKey={h.bizKey}
@@ -80,12 +83,31 @@ export default function PolleriaPOS() {
         />
       )}
 
+      {/* La barra de mesas sigue mostrando solo mesas físicas */}
       <MesaBar
         MESAS_TOTAL={h.MESAS_TOTAL}
         mesaSel={h.mesaSel}
         setMesaSel={h.setMesaSel}
         mesaOcupada={h.mesaOcupada}
       />
+
+      {h.showAuth && (
+        <div className="auth-backdrop">
+          <div className="auth-modal">
+            <h3>Ingresar clave ({h.pendingRole})</h3>
+            <input
+              type="password"
+              value={h.passInput}
+              onChange={(e)=>h.setPassInput(e.target.value)}
+              placeholder="****"
+            />
+            <div className="auth-actions">
+              <button className="btn-action charge" onClick={h.confirmRole}>Entrar</button>
+              <button className="btn-action" onClick={()=>h.setShowAuth(false)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

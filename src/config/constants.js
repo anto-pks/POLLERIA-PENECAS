@@ -6,4 +6,3 @@ export const ROLE_PASSWORD = { MESERO:"1111", COCINERO:"2222", CAJERO:"3333", AD
  *  LLEVAR 1 => 9001, LLEVAR 2 => 9002, etc.
  */
 export const TAKEAWAY_BASE = 9000;
-
