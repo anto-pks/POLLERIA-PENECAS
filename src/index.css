@@ -18,24 +18,10 @@ body { margin: 0; font-family: Segoe UI, Arial, sans-serif; color: var(--texto);
 .app { display: flex; flex-direction: column; min-height: 100%; }
 
 /* ====== Header ====== */
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  background: #fff;
-  border-bottom: 1px solid var(--gris-borde);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
-  padding: 12px 16px;
-
-  height: 70px;
-  width: 100%;
+.header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; background:#fff; border-bottom:1px solid var(--gris-borde);
+  position: sticky; top: 0; z-index: 30;
 }
 
 .brand{ display:flex; align-items:center; gap:12px; }
@@ -48,13 +34,10 @@ body { margin: 0; font-family: Segoe UI, Arial, sans-serif; color: var(--texto);
 
 /* ====== Layout principal ====== */
 /* IMPORTANTE: el padding-bottom usa la altura de la barra para que el scroll no quede tapado */
-.content {
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 18px;
-  padding: 82px 18px calc(var(--mesas-h) + 12px);
+.content{
+  display:grid; grid-template-columns: 1fr 380px; gap:18px;
+  padding:16px 18px calc(var(--mesas-h) + 12px);
 }
-
 
 /* ====== Menú (categorías + productos) ====== */
 .menu{ background:#fff; border:1px solid var(--gris-borde); border-radius:14px; padding:14px; }
@@ -212,44 +195,13 @@ body { margin: 0; font-family: Segoe UI, Arial, sans-serif; color: var(--texto);
 }
 
 @media (max-width: 860px) {
-  .header {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    height: auto;
-    padding: 10px 12px;
-  }
-
-  .brand {
-    flex: 1 1 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .title {
-    font-size: 20px;
-  }
-
-  .right-controls {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    row-gap: 6px;
-    margin-top: 6px;
-  }
-
-  .carry-btn {
-    flex: 1 1 48%;
-    display: inline-flex;
-    justify-content: center;
-  }
-
-  .role-select {
-    flex: 1 1 48%;
-  }
+  .header { padding: 10px 12px; }
+  .title { font-size: 20px; }
+  .content { grid-template-columns: 1fr; padding: 10px 12px calc(var(--mesas-h) + 10px); }
+  .ticket { order:2; position: static; max-height: unset; margin-top: 10px; }
+  .menu { order:1; }
+  .mesas-bar { height: var(--mesas-h); }
+  .mesa-square { min-width: 60px; height: 44px; font-size: 14px; }
 }
 
 /* Cajero layout */
