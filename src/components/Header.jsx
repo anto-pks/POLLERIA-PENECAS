@@ -1,7 +1,7 @@
 import React from "react";
 import { ROLES } from "../config/constants";
 
-export default function Header({ mesaSel, rol, requestRole, crearParaLlevar }) {
+export default function Header({ mesaSel, rol, requestRole, createTakeaway }) {
   return (
     <header className="header">
       <div className="brand">
@@ -10,7 +10,7 @@ export default function Header({ mesaSel, rol, requestRole, crearParaLlevar }) {
       </div>
 
       <div className="right-controls">
-        <button className="carry-btn" onClick={crearParaLlevar} title="Crear pedido para llevar">
+        <button className="carry-btn" onClick={createTakeaway} title="Crear pedido para llevar">
           🛍️ Para llevar
         </button>
 

@@ -10,14 +10,27 @@ export default function VistaMesero({
   notaInputRef, notasPorMesa, guardarNotaMesa,
   // para llevar
   isTakeawayId, TAKEAWAY_BASE,
+  pedidosPorMesa, setMesaSel,
+  cobrarMesa
 }) {
   const etiqueta = isTakeawayId(mesaSel)
-    ? `LLEVAR ${mesaSel - TAKEAWAY_BASE}`
+    ? `Llevar ${mesaSel - TAKEAWAY_BASE}`
     : `Mesa #${mesaSel}`;
+  
+  // Buscar los pedidos “para llevar” activos (que tienen productos)
+  const takeawaysActivos = Object.keys(pedidosPorMesa || {})
+    .map(Number)
+    .filter(id => isTakeawayId(id))
+    .filter(id => {
+      const mesa = pedidosPorMesa[id] || {};
+      const has = (o) => o && Object.values(o).some(x => x.cantidad > 0);
+      return has(mesa.draft) || has(mesa.sent);
+    });
+
 
   return (
     <div className="content">
-      <div className="menu">
+      <div className="menu"> 
         {CATS.map((cat)=>(
           <div key={cat.key} className="cat-block">
             <div className="cat-head">
@@ -42,6 +55,34 @@ export default function VistaMesero({
           <h3>Pedido {etiqueta}</h3>
           <span className={`chip ${estadoMesa[mesaSel] || "tomando"}`}>{estadoMesa[mesaSel] || "tomando"}</span>
         </div>
+
+        {takeawaysActivos.length > 0 && (
+          <div style={{ marginBottom: 10 }}>
+            <label
+              style={{
+                fontSize: 12,
+                display: "block",
+                marginBottom: 4,
+                color: "#374151",
+              }}
+            >
+              Pedidos para llevar activos
+            </label>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {takeawaysActivos.map((id) => (
+                <button
+                  key={id}
+                  className="btn-action"
+                  style={{ padding: "6px 10px", fontSize: 13 }}
+                  onClick={() => setMesaSel(id)}
+                >
+                  L{ id - TAKEAWAY_BASE }
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
 
         {Object.keys(draft).length===0 && Object.keys(sent).length===0 ? (
           <p className="muted">Sin productos.</p>
@@ -91,11 +132,25 @@ export default function VistaMesero({
         </div>
 
         <div className="total-row"><span>Total (enviado)</span><strong>S/ {totalSent}</strong></div>
-        <div className="ticket-actions">
-          <button className="btn-action send" onClick={enviarACocina} disabled={Object.keys(draft).length===0}>
+        <div className="ticket-actions" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <button
+            className="btn-action send"
+            onClick={enviarACocina}
+            disabled={Object.keys(draft).length === 0}
+          >
             Enviar a Cocina (solo cambios)
           </button>
+
+          {Object.keys(sent).length > 0 && (
+            <button
+              className="btn-pay"
+              onClick={() => cobrarMesa(mesaSel)}
+            >
+              Cobrar / Cerrar cuenta
+            </button>
+          )}
         </div>
+
       </aside>
     </div>
   );

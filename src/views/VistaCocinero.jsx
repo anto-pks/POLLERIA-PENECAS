@@ -7,11 +7,15 @@ export default function VistaCocinero({
   TAKEAWAY_BASE, isTakeawayId,
 }) {
   const mesas = useMemo(() => {
-    const mesasNum = Array.from({length:MESAS_TOTAL},(_,i)=>i+1);
-    const llevarIds = Object.keys(pedidosPorMesa).map(Number).filter(id => isTakeawayId(id));
+    const mesasNum = Array.from({ length: MESAS_TOTAL }, (_, i) => i + 1);
+    const llevarIds = Object.keys(pedidosPorMesa)
+      .map(Number)
+      .filter(id => isTakeawayId(id));
+
     return [...mesasNum, ...llevarIds]
-      .filter(n => ensureMesa(pedidosPorMesa[n]).sent && Object.keys(ensureMesa(pedidosPorMesa[n]).sent).length>0);
-  }, [MESAS_TOTAL, pedidosPorMesa, ensureMesa, isTakeawayId]);
+      // solo mostramos mesas que todavía tienen algo pendiente
+      .filter(n => pendientesMesa(n).length > 0);
+}, [MESAS_TOTAL, pedidosPorMesa, pendientesMesa, isTakeawayId]);
 
   const etiquetaMesa = (id) =>
     isTakeawayId(id) ? `LLEVAR ${id - TAKEAWAY_BASE}` : `Mesa #${id}`;

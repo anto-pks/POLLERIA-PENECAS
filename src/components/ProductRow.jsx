@@ -1,4 +1,3 @@
-// src/components/ProductRow.jsx
 import React from "react";
 import VariantChip from "./VariantChip";
 import { VARS_BRASAS, VARS_PARRILLA_DEFAULT, variantPrice, keyFor } from "../config/variants";

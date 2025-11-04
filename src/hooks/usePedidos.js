@@ -115,47 +115,6 @@ useEffect(() => {
     setMesaSel(id);
   };
 
-  // ==== CARGA DE MESA + REALTIME ====
-  useEffect(() => {
-    let unsubscribe;
-    async function loadMesa() {
-      // 1) Items persistidos en DB (solo sent/ready)
-      const snap = await getMesaSnapshot(mesaSel); // {sent:{}, ready:{}}
-
-      // 2) Estado/nota de la mesa (si existe)
-      const mesa = await getMesaAbierta(mesaSel); // {id_mesa, estado, nota} | null
-
-      // 3) Actualiza estado local manteniendo borrador (draft) si existía
-      setPedidosPorMesa((prev) => ({
-        ...prev,
-        [mesaSel]: {
-          draft: prev[mesaSel]?.draft || {},
-          sent: snap.sent || {},
-          ready: snap.ready || {},
-          nota: mesa?.nota ?? prev[mesaSel]?.nota ?? "",
-        },
-      }));
-
-      // 4) Estado de la mesa
-      if (mesa?.estado) {
-        setEstadoMesa((prev) => ({ ...prev, [mesaSel]: mesa.estado }));
-      }
-
-      // 5) Reflejar nota también en el editor local
-      setNotasPorMesa((prev) => ({
-        ...prev,
-        [mesaSel]: mesa?.nota ?? prev[mesaSel] ?? "",
-      }));
-    }
-
-    loadMesa();
-    unsubscribe = subscribeMesa(mesaSel, loadMesa);
-
-    return () => {
-      if (typeof unsubscribe === "function") unsubscribe();
-    };
-  }, [mesaSel]);
-
   const ensureMesa = (m) => ({ draft: {}, sent: {}, ready: {}, ...(m || {}) });
 
   // Selectores mesa actual

@@ -1,4 +1,3 @@
-// src/views/VistaAdmin.jsx
 import React, { useMemo } from "react";
 
 export default function VistaAdmin({

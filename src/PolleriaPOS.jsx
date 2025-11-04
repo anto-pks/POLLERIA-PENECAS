@@ -41,6 +41,9 @@ export default function PolleriaPOS() {
           guardarNotaMesa={h.guardarNotaMesa}
           isTakeawayId={h.isTakeawayId}
           TAKEAWAY_BASE={h.TAKEAWAY_BASE}
+          pedidosPorMesa={h.pedidosPorMesa}
+          setMesaSel={h.setMesaSel}
+          cobrarMesa={h.cobrarMesa} 
         />
       )}
 
@@ -83,13 +86,14 @@ export default function PolleriaPOS() {
         />
       )}
 
-      {/* La barra de mesas sigue mostrando solo mesas físicas */}
-      <MesaBar
-        MESAS_TOTAL={h.MESAS_TOTAL}
-        mesaSel={h.mesaSel}
-        setMesaSel={h.setMesaSel}
-        mesaOcupada={h.mesaOcupada}
-      />
+      {(h.rol === "MESERO") && (
+        <MesaBar
+          MESAS_TOTAL={h.MESAS_TOTAL}
+          mesaSel={h.mesaSel}
+          setMesaSel={h.setMesaSel}
+          mesaOcupada={h.mesaOcupada}
+        />
+      )}
 
       {h.showAuth && (
         <div className="auth-backdrop">
