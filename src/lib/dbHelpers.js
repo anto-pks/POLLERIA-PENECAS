@@ -100,29 +100,32 @@ export async function sendDiffToKitchen(mesaId, draft, prevSent) {
 }
 
 /** Cobrar: inserta venta y limpia mesa */
-/** Cobrar: inserta venta y limpia mesa */
-export async function cobrarMesaDB({ mesa, dateISO, fecha, items, total, nota }) {
-  // 1️⃣ Guarda ticket en "ventas"
-  const { error: eInsert } = await supabase.from("ventas").insert({
-    mesa,               // int4
-    ts: Date.now(),     // int8, timestamp en ms
-    dateiso: dateISO,   // 👈 OJO: columna se llama dateiso (todo minúscula)
-    fecha,              // timestamptz (ISO string)
-    total,              // numeric
-    nota,               // text
-    data: items,        // jsonb
-  });
+export async function cobrarMesaDB({ id, mesa, dateISO, fecha, items, total, nota }) {
+  const payload = {
+    id,              // 👈 ID del ticket (texto)
+    mesa,            // int4
+    ts: Date.now(),  // int8, timestamp en ms
+    dateiso: dateISO, // 👈 columna en la BD se llama "dateiso"
+    fecha,           // timestamptz (ISO string)
+    total,           // numeric
+    nota,            // text
+    data: items,     // jsonb (tu columna se llama "data")
+  };
 
-  if (eInsert) {
-    console.error("[cobrarMesaDB] Error insertando venta", eInsert);
-    throw eInsert;
+  console.log("[cobrarMesaDB] Payload venta:", payload);
+
+  const { error } = await supabase.from("ventas").insert(payload);
+
+  if (error) {
+    console.error("[cobrarMesaDB] Error insertando venta", error);
+    throw error; // dejamos que subir el error para que cobrarMesa se entere
   }
 
   // 2️⃣ Borra items de la mesa
   const { error: eItems } = await supabase
     .from("mesa_items")
     .delete()
-    .eq("mesa_id", mesa);   // 👈 campo correcto
+    .eq("mesa_id", mesa);
 
   if (eItems) {
     console.error("[cobrarMesaDB] Error borrando mesa_items", eItems);

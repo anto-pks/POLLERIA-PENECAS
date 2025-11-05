@@ -341,27 +341,10 @@ const cobrarMesa = async (id) => {
 
   const notaTicket = (m.nota ?? notasPorMesa[id] ?? "").trim();
   const now = new Date();
-  const dateISO = businessKeyDate(now); // clave de negocio (ej: 2025-11-05)
+  const dateISO = businessKeyDate(now); // ej: "2025-11-05"
 
-  // 1️⃣ Intentar guardar en Supabase primero
-  try {
-    await cobrarMesaDB({
-      mesa: id,
-      dateISO,                    // 👈 aquí está bien
-      fecha: now.toISOString(),
-      items,
-      total: totalTicket,
-      nota: notaTicket,
-    });
-  } catch (e) {
-    console.error("[cobrarMesa] Error al cobrar", e);
-    alert("No se pudo guardar la venta en Supabase. Revisa permisos de la tabla 'ventas'.");
-    return; // NO seguimos, para no duplicar ni limpiar mal
-  }
-
-  // 2️⃣ Si lo anterior salió bien, armamos el ticket para mostrar en la UI
   const ticket = {
-    id: `${Date.now()}_${id}`,
+    id: `${Date.now()}_${id}`, // 👈 mismo ID que también mandamos a Supabase
     mesa: id,
     ts: now.getTime(),
     dateISO,
@@ -371,10 +354,27 @@ const cobrarMesa = async (id) => {
     nota: notaTicket,
   };
 
-  // 3️⃣ Actualizar dashboard local
+  // 1️⃣ Actualizar dashboard local al toque
   setVentasDia((prev) => [ticket, ...prev]);
 
-  // 4️⃣ Limpiar la mesa en memoria
+  // 2️⃣ Guardar en Supabase
+  try {
+    await cobrarMesaDB({
+      id: ticket.id,
+      mesa: id,
+      dateISO,
+      fecha: now.toISOString(),
+      items,
+      total: totalTicket,
+      nota: notaTicket,
+    });
+  } catch (e) {
+    console.error("[cobrarMesa] Error al cobrar", e);
+    alert("No se pudo guardar la venta en Supabase. Revisa la consola (F12 → Console) para más detalle.");
+    return;
+  }
+
+  // 3️⃣ Limpiar la mesa de la memoria (desaparece del cajero / cocina)
   setPedidosPorMesa((prev) => {
     const cp = { ...prev };
     delete cp[id];
@@ -396,6 +396,7 @@ const cobrarMesa = async (id) => {
     setAbiertas({});
   }
 };
+
   // Métricas admin (desde ventasDia)
   const ticketsDay = ventasDia;
 
