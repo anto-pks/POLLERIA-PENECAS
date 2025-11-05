@@ -14,7 +14,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ventasKey, businessKeyDate, formatFechaPE } from "../lib/fechas";
 import { BRASA_EQ, normalize, PARRILLA_MAIN } from "../config/mappings";
-import { MESAS_TOTAL, ROLES, ROLE_PASSWORD, TAKEAWAY_BASE } from "../config/constants";
+import { MESAS_TOTAL, ROLES, TAKEAWAY_BASE } from "../config/constants";
 
 export function usePedidos() {
   // pedidos[mesa] = { draft:{key:{precio,cantidad}}, sent:{}, ready:{}, nota? }
@@ -24,15 +24,15 @@ export function usePedidos() {
   const [abiertas, setAbiertas] = useState({});
   const [rol, setRol] = useState("MESERO");
 
-  // Login por rol
-  const [showAuth, setShowAuth] = useState(false);
-  const [pendingRole, setPendingRole] = useState(null);
-  const [passInput, setPassInput] = useState("");
-
   // Ventas día (local, para dashboard)
   const [ventasDia, setVentasDia] = useState([]);
   const [bizKey, setBizKey] = useState(ventasKey());
   // dentro de useEffect de carga (src/hooks/usePedidos.js)
+  
+  // Notas por mesa
+  const [notasPorMesa, setNotasPorMesa] = useState({});
+  const notaInputRef = useRef(null);
+
 useEffect(() => {
   let unsubscribe;
 
@@ -45,16 +45,19 @@ useEffect(() => {
       const mesa = await getMesaAbierta(mesaSel);
 
       // 3) Estado local
-      setPedidosPorMesa((prev) => ({
-        ...prev,
-        [mesaSel]: {
-          draft: prev[mesaSel]?.draft || {},
-          sent: snap.sent || {},
-          ready: snap.ready || {},
-          nota: mesa?.nota ?? prev[mesaSel]?.nota ?? "",
-        },
-      }));
-
+      setPedidosPorMesa((prev) => {
+        const prevMesa = prev[mesaSel] || {};
+        return {
+          ...prev,
+          [mesaSel]: {
+            draft: prevMesa.draft || {},
+            sent: snap.sent || {},
+            // 👇 conservamos lo que ya estaba listo en este dispositivo
+            ready: prevMesa.ready || {},
+            nota: mesa?.nota ?? prevMesa.nota ?? "",
+          },
+        };
+      });
       // 4) Estado de la mesa
       if (mesa?.estado) {
         setEstadoMesa((prev) => ({ ...prev, [mesaSel]: mesa.estado }));
@@ -128,7 +131,7 @@ useEffect(() => {
             next[id] = {
               draft: prevMesa.draft || {},
               sent: snap.sent || {},
-              ready: snap.ready || {},
+              ready: prevMesa.ready || {},
               nota: nota ?? prevMesa.nota ?? "",
             };
           });
@@ -162,11 +165,6 @@ useEffect(() => {
       if (typeof unsubscribeAll === "function") unsubscribeAll();
     };
   }, []);
-
-  // Notas por mesa
-  const [notasPorMesa, setNotasPorMesa] = useState({});
-  const notaInputRef = useRef(null);
-
   // Helpers “para llevar”
   const isTakeawayId = (id) => Number(id) >= TAKEAWAY_BASE;
   const nextTakeawayId = () => {
@@ -345,19 +343,6 @@ const marcarListo = async (id, nombreKey, qty) => {
     if (mesaSel === id) setAbiertas({});
   };
 
-  // Auth
-  const requestRole = (r) => {
-    setPendingRole(r);
-    setPassInput("");
-    setShowAuth(true);
-  };
-  const confirmRole = () => {
-    if (ROLE_PASSWORD[pendingRole] === passInput.trim()) {
-      setRol(pendingRole);
-      setShowAuth(false);
-    } else alert("Clave incorrecta");
-  };
-
   // Métricas admin (desde ventasDia)
   const ticketsDay = ventasDia;
 
@@ -400,7 +385,6 @@ const marcarListo = async (id, nombreKey, qty) => {
     // constantes
     MESAS_TOTAL,
     ROLES,
-    ROLE_PASSWORD,
     TAKEAWAY_BASE,
     isTakeawayId,
 
@@ -413,15 +397,6 @@ const marcarListo = async (id, nombreKey, qty) => {
     setAbiertas,
     rol,
     setRol,
-    showAuth,
-    setShowAuth,
-    pendingRole,
-    passInput,
-    setPassInput,
-
-    // auth
-    requestRole,
-    confirmRole,
 
     // ventas / día
     ventasDia,

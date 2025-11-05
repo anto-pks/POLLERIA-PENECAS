@@ -10,7 +10,7 @@ const ymd = (d=new Date()) => {
 export const businessKeyDate = (d=new Date()) => {
   const u = toLocalUTC(d);
   // 17:00 = inicio del día de negocio
-  if (u.getUTCHours() < 17) {
+  if (u.getUTCHours() < 7) {
     const prev = new Date(u);
     prev.setUTCDate(prev.getUTCDate() - 1);
     return ymd(prev);

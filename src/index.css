@@ -47,16 +47,12 @@ body { margin: 0; font-family: Segoe UI, Arial, sans-serif; color: var(--texto);
   font-weight: 700;
   margin: 0;
 }
-.mesa-info{ display:flex; align-items:center; gap:8px; font-size:16px; }
-.mesa-info strong{ font-size:18px; }
 .right-controls {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: nowrap;      /* que NO se vayan a segunda línea */
 }
-.role-select{ padding:8px 10px; border:1px solid var(--gris-borde); border-radius:8px; background:#fff; }
-
 /* ====== Layout principal ====== */
 /* IMPORTANTE: el padding-bottom usa la altura de la barra para que el scroll no quede tapado */
 .content{
@@ -201,18 +197,6 @@ body { margin: 0; font-family: Segoe UI, Arial, sans-serif; color: var(--texto);
 .admin-left,.admin-right{ background:#fff; border:1px solid var(--gris-borde); border-radius:14px; padding:14px; }
 .filters{ display:flex; gap:12px; margin:8px 0 12px; }
 .panel{ border:1px solid var(--gris-borde); border-radius:12px; padding:10px; margin-top:12px; background:#f9fafb; }
-
-.auth-backdrop{
-  position:fixed; inset:0; background:rgba(0,0,0,.35);
-  display:flex; align-items:center; justify-content:center; z-index:50;
-}
-.auth-modal{
-  width:320px; background:#fff; border:1px solid var(--gris-borde); border-radius:12px; padding:14px; box-shadow:0 10px 30px rgba(0,0,0,.2);
-}
-.auth-modal h3{ margin:0 0 10px; }
-.auth-modal input{ width:100%; padding:10px; border:1px solid var(--gris-borde); border-radius:8px; }
-.auth-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
-
 /* ====== Responsive ====== */
 @media (max-width: 1024px) {
   .content{ grid-template-columns: 1fr 340px; }
