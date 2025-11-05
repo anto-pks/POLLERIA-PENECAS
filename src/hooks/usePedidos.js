@@ -5,9 +5,10 @@ import {
   setEstadoMesa as setEstadoMesaDB,
   setNotaMesa as setNotaMesaDB,
   sendDiffToKitchen,
-  markReady,
   cobrarMesaDB,
   subscribeMesa,
+  listMesasAbiertas,
+  subscribeMesas,
 } from "../lib/dbHelpers";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -93,6 +94,74 @@ useEffect(() => {
       localStorage.setItem(k, JSON.stringify(ventasDia));
     } catch {}
   }, [ventasDia]);
+  // ==== COCINA EN VIVO: escuchar TODAS las mesas abiertas ====
+  useEffect(() => {
+    let unsubscribeAll;
+
+    async function refreshAllMesas() {
+      try {
+        // 1) Traer todas las mesas abiertas (id, estado, nota)
+        const mesas = await listMesasAbiertas(); // [{id, estado, nota}, ...]
+
+        // 2) Actualizar estados de mesa
+        setEstadoMesa((prev) => {
+          const next = { ...prev };
+          mesas.forEach((m) => {
+            next[m.id] = m.estado || "enviado";
+          });
+          return next;
+        });
+
+        // 3) Cargar snapshot (sent/ready) de cada mesa
+        const snaps = await Promise.all(
+          mesas.map(async (m) => {
+            const snap = await getMesaSnapshot(m.id);
+            return { id: m.id, snap, nota: m.nota };
+          })
+        );
+
+        // 4) Actualizar pedidosPorMesa manteniendo el draft local si existe
+        setPedidosPorMesa((prev) => {
+          const next = { ...prev };
+          snaps.forEach(({ id, snap, nota }) => {
+            const prevMesa = prev[id] || { draft: {}, sent: {}, ready: {}, nota: "" };
+            next[id] = {
+              draft: prevMesa.draft || {},
+              sent: snap.sent || {},
+              ready: snap.ready || {},
+              nota: nota ?? prevMesa.nota ?? "",
+            };
+          });
+          return next;
+        });
+
+        // 5) Actualizar notasPorMesa
+        setNotasPorMesa((prev) => {
+          const next = { ...prev };
+          mesas.forEach((m) => {
+            next[m.id] = m.nota ?? prev[m.id] ?? "";
+          });
+          return next;
+        });
+      } catch (e) {
+        console.error("[refreshAllMesas] Error", e);
+      }
+    }
+
+    // Primera carga
+    refreshAllMesas();
+
+    // Suscripción realtime a cualquier cambio en tabla "mesas"
+    try {
+      unsubscribeAll = subscribeMesas(refreshAllMesas);
+    } catch (e) {
+      console.error("[subscribeMesas] Error", e);
+    }
+
+    return () => {
+      if (typeof unsubscribeAll === "function") unsubscribeAll();
+    };
+  }, []);
 
   // Notas por mesa
   const [notasPorMesa, setNotasPorMesa] = useState({});
@@ -193,17 +262,36 @@ useEffect(() => {
     return out;
   };
 
-  // Cocina: marcar listo
-  const marcarListo = async (id, nombreKey, qty) => {
-    if (qty <= 0) return;
-    const m = nombreKey.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
-    const nombre = m ? m[1] : nombreKey;
-    const variante = m ? m[2] : null;
+const marcarListo = async (id, nombreKey, qty) => {
+  if (qty <= 0) return;
 
-    await markReady(id, nombre, variante, qty);
-    await setEstadoMesaDB(id, "listo");
-  };
+  // 1) Actualizar "ready" SOLO en el estado local (no en la BD)
+  setPedidosPorMesa((prev) => {
+    const mesa = ensureMesa(prev[id]);
+    const sent = mesa.sent || {};
+    const ready = { ...(mesa.ready || {}) };
 
+    const infoSent = sent[nombreKey] || {};
+    const actual = ready[nombreKey]?.cantidad || 0;
+    const nueva = actual + qty;
+
+    ready[nombreKey] = {
+      precio: infoSent.precio || ready[nombreKey]?.precio || 0,
+      cantidad: nueva,
+    };
+
+    return {
+      ...prev,
+      [id]: {
+        ...mesa,
+        ready,
+      },
+    };
+  });
+
+  // 2) Actualizar solo el estado de la mesa en la tabla "mesas"
+  await setEstadoMesaDB(id, "listo");
+};
   // Cajero: cobrar y limpiar
   const cobrarMesa = async (id) => {
     const m = ensureMesa(pedidosPorMesa[id]);

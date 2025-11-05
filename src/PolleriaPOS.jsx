@@ -87,12 +87,15 @@ export default function PolleriaPOS({ rolSupabase, onLogout }) {
         />
       )}
 
-      <MesaBar
-        MESAS_TOTAL={h.MESAS_TOTAL}
-        mesaSel={h.mesaSel}
-        setMesaSel={h.setMesaSel}
-        mesaOcupada={h.mesaOcupada}
-      />
+      {rol === "MESERO" && (
+        <MesaBar
+          MESAS_TOTAL={h.MESAS_TOTAL}
+          mesaSel={h.mesaSel}
+          setMesaSel={h.setMesaSel}
+          mesaOcupada={h.mesaOcupada}
+        />
+      )}
+
     </div>
   );
 }

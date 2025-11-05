@@ -99,40 +99,6 @@ export async function sendDiffToKitchen(mesaId, draft, prevSent) {
   if (e2) throw e2;
 }
 
-/** Cocina marca listo: disminuye cantidades pendientes (simple: borra o reduce) */
-export async function markReady(mesaId, nombre, variante, qty) {
-  // Aquí el ready es “conceptual”: restamos del item enviado.
-  // Cargamos item actual:
-  const nombreKey = variante ? `${nombre} (${variante})` : nombre;
-
-  const { data, error } = await supabase
-    .from('mesa_items')
-    .select('*')
-    .eq('mesa_id', mesaId)
-    .eq('nombre', nombreKey)
-    .maybeSingle();
-  if (error) throw error;
-
-  if (!data) return;
-
-  const nueva = Math.max(0, Number(data.cantidad || 0) - Number(qty || 0));
-  if (nueva === 0) {
-    const { error: eDel } = await supabase
-      .from('mesa_items')
-      .delete()
-      .eq('mesa_id', mesaId)
-      .eq('nombre', nombreKey);
-    if (eDel) throw eDel;
-  } else {
-    const { error: eUpd } = await supabase
-      .from('mesa_items')
-      .update({ cantidad: nueva })
-      .eq('mesa_id', mesaId)
-      .eq('nombre', nombreKey);
-    if (eUpd) throw eUpd;
-  }
-}
-
 /** Cobrar: inserta venta y limpia mesa */
 export async function cobrarMesaDB({ mesa, dateISO, fecha, items, total, nota }) {
   // 1️⃣ Guarda ticket en ventas

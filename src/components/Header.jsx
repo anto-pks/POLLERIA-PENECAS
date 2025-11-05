@@ -1,7 +1,16 @@
 import React from "react";
 
+const ROLE_LABELS = {
+  ADMINISTRADOR: "ADMIN",
+  COCINERO: "COCINA",
+  // MESERO y CAJERO se dejan igual
+};
+
 export default function Header({ mesaSel, rol, createTakeaway, onLogout }) {
-  // Estilo base común para los botones de rol y salir
+  const isMesero = rol === "MESERO";
+  const roleText = ROLE_LABELS[rol] || rol || "SIN ROL";
+
+  // Estilo común para el chip de rol y el botón Salir
   const baseBtnStyle = {
     textTransform: "uppercase",
     fontWeight: 700,
@@ -19,29 +28,33 @@ export default function Header({ mesaSel, rol, createTakeaway, onLogout }) {
 
   return (
     <header className="header">
-      {/* --- Logo y nombre --- */}
+      {/* Logo + nombre */}
       <div className="brand">
         <img src="/logo.png" alt="Logo Penecas" className="logo" />
         <h1 className="title">Penecas</h1>
       </div>
 
-      {/* --- Controles derechos --- */}
+      {/* Controles de la derecha */}
       <div className="right-controls">
-        {/* Botón "Para llevar" */}
-        <button
-          className="carry-btn"
-          onClick={createTakeaway}
-          title="Crear pedido para llevar"
-        >
-          🛍️ LLEVAR
-        </button>
+        {/* Estos dos SOLO para MESERO */}
+        {isMesero && (
+          <>
+            <button
+              className="carry-btn"
+              onClick={createTakeaway}
+              title="Crear pedido para llevar"
+            >
+              🛍️ Para llevar
+            </button>
 
-        {/* Info mesa */}
-        <div className="mesa-info">
-          <strong>M#{mesaSel}</strong>
-        </div>
+            <div className="mesa-info">
+              <span>Mesa</span>
+              <strong>#{mesaSel}</strong>
+            </div>
+          </>
+        )}
 
-        {/* Rol visible */}
+        {/* Chip con el rol (MESERO / COCINA / CAJERO / ADMIN) */}
         <span
           style={{
             ...baseBtnStyle,
@@ -50,10 +63,10 @@ export default function Header({ mesaSel, rol, createTakeaway, onLogout }) {
             borderColor: "#10b981",
           }}
         >
-          {rol || "SIN ROL"}
+          {roleText}
         </span>
 
-        {/* Botón salir */}
+        {/* Botón salir (siempre visible) */}
         {onLogout && (
           <button
             onClick={onLogout}
@@ -64,14 +77,10 @@ export default function Header({ mesaSel, rol, createTakeaway, onLogout }) {
               color: "#991b1b",
               borderColor: "#fca5a5",
               cursor: "pointer",
-              transition: "all 0.2s ease",
+              transition: "background 0.2s ease",
             }}
-            onMouseEnter={(e) =>
-              (e.target.style.background = "#fecaca")
-            }
-            onMouseLeave={(e) =>
-              (e.target.style.background = "#fee2e2")
-            }
+            onMouseEnter={(e) => (e.target.style.background = "#fecaca")}
+            onMouseLeave={(e) => (e.target.style.background = "#fee2e2")}
           >
             Salir
           </button>

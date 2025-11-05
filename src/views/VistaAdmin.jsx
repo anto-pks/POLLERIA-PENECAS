@@ -29,7 +29,7 @@ export default function VistaAdmin({
             <li className="k-row"><span>Carne parrilla</span><strong>{parrillaControl.CARNE}</strong></li>
             <li className="k-row"><span>Chuleta (cerdo)</span><strong>{parrillaControl.CHULETA}</strong></li>
           </ul>
-          <p className="muted" style={{marginTop:6}}>* Incluye especiales mapeadas y <strong>Pollo Broaster</strong> como pollo parrilla.</p>
+          <p className="muted" style={{marginTop:6}}>* Incluye parrillas especiales y <strong>Pollo Broaster</strong> como pollo parrilla.</p>
         </div>
 
         <div className="panel">
