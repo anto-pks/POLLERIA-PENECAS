@@ -20,6 +20,7 @@ body { margin: 0; font-family: Segoe UI, Arial, sans-serif; color: var(--texto);
 /* ====== Header ====== */
 .header{
   display:flex; align-items:center; justify-content:space-between;
+  flex-wrap: wrap;
   padding:14px 18px; background:#fff; border-bottom:1px solid var(--gris-borde);
   position: sticky; top: 0; z-index: 30;
 }

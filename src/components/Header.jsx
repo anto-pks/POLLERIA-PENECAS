@@ -44,13 +44,8 @@ export default function Header({ mesaSel, rol, createTakeaway, onLogout }) {
               onClick={createTakeaway}
               title="Crear pedido para llevar"
             >
-              🛍️ Para llevar
+              🛍️Llevar
             </button>
-
-            <div className="mesa-info">
-              <span>Mesa</span>
-              <strong>#{mesaSel}</strong>
-            </div>
           </>
         )}
 
