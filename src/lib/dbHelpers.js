@@ -117,6 +117,17 @@ export async function cobrarMesaDB({ mesa, dateISO, fecha, items, total, nota })
   // 3️⃣ ⚡ Elimina la mesa completa (esto dispara el DELETE realtime)
   await supabase.from("mesas").delete().eq("id", mesa);
 }
+/** Lee todas las ventas de un día de negocio (por dateISO) */
+export async function getVentasDelDia(dateISO) {
+  const { data, error } = await supabase
+    .from("ventas")
+    .select("id, mesa, fecha, dateISO, items, total, nota")
+    .eq("dateISO", dateISO)
+    .order("fecha", { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
 
 /** ========== UTILIDADES PARA “TODAS LAS MESAS” ========== */
 

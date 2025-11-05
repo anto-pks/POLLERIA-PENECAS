@@ -3,12 +3,12 @@ import {
   getMesaAbierta,
   upsertMesaAbierta,
   setEstadoMesa as setEstadoMesaDB,
-  setNotaMesa as setNotaMesaDB,
   sendDiffToKitchen,
   cobrarMesaDB,
   subscribeMesa,
   listMesasAbiertas,
   subscribeMesas,
+  getVentasDelDia,
 } from "../lib/dbHelpers";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -32,6 +32,35 @@ export function usePedidos() {
   // Notas por mesa
   const [notasPorMesa, setNotasPorMesa] = useState({});
   const notaInputRef = useRef(null);
+
+// Cargar tickets del día desde Supabase al iniciar
+useEffect(() => {
+  async function loadVentasDia() {
+    try {
+      const dateISO = businessKeyDate(); // mismo criterio que usas al cobrar
+      const rows = await getVentasDelDia(dateISO);
+
+      const mapped = rows
+        .map((row) => ({
+          id: row.id || `${row.fecha}_${row.mesa}`,
+          mesa: row.mesa,
+          ts: new Date(row.fecha).getTime(),
+          dateISO: row.dateISO,
+          fecha: formatFechaPE(row.fecha), // bonito formato para mostrar
+          items: row.items || [],
+          total: row.total || 0,
+          nota: row.nota || "",
+        }))
+        .sort((a, b) => b.ts - a.ts); // últimos tickets primero
+
+      setVentasDia(mapped);
+    } catch (e) {
+      console.error("[loadVentasDia] Error cargando ventas", e);
+    }
+  }
+
+  loadVentasDia();
+}, []);
 
 useEffect(() => {
   let unsubscribe;
