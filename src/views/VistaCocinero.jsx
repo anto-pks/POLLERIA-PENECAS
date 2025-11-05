@@ -42,7 +42,7 @@ const mesas = useMemo(() => {
                     {pend.map((it)=>(
                       <li key={it.nombre} className="k-row">
                         <span>{it.nombre}</span><strong>x{it.cantidad}</strong>
-                        <button className="btn-action done" onClick={()=>marcarListo(n,it.nombre,it.cantidad)}>Marcar LISTO</button>
+                        <button className="btn-action done" onClick={()=>marcarListo(n,it.nombre,it.cantidad)}>LISTO</button>
                       </li>
                     ))}
                   </ul>
