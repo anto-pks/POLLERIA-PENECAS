@@ -323,58 +323,82 @@ const marcarListo = async (id, nombreKey, qty) => {
   // 2) Actualizar solo el estado de la mesa en la tabla "mesas"
   await setEstadoMesaDB(id, "listo");
 };
-  // Cajero: cobrar y limpiar
+// Cajero: cobrar y limpiar
   const cobrarMesa = async (id) => {
-    const m = ensureMesa(pedidosPorMesa[id]);
-    const s = m.sent || {};
-    const items = Object.entries(s).map(([nombre, v]) => ({
-      nombre,
-      precio: v.precio,
-      cantidad: v.cantidad,
-      subtotal: v.precio * v.cantidad,
-    }));
-    const totalTicket = items.reduce((a, it) => a + it.subtotal, 0);
-    if (totalTicket <= 0) return;
+  const m = ensureMesa(pedidosPorMesa[id]);
+  const s = m.sent || {};
 
-    const notaTicket = (m.nota ?? notasPorMesa[id] ?? "").trim();
-    const now = new Date();
-    const ticket = {
-      id: `${Date.now()}_${id}`,
-      mesa: id,
-      ts: now.getTime(),
-      dateISO: businessKeyDate(now),
-      fecha: formatFechaPE(now),
-      items,
-      total: totalTicket,
-      nota: notaTicket,
-    };
+  // Construimos los ítems del ticket
+  const items = Object.entries(s).map(([nombre, v]) => ({
+    nombre,
+    precio: v.precio,
+    cantidad: v.cantidad,
+    subtotal: v.precio * v.cantidad,
+  }));
 
-    setVentasDia((prev) => [ticket, ...prev]);
+  const totalTicket = items.reduce((a, it) => a + it.subtotal, 0);
+  if (totalTicket <= 0) return; // nada que cobrar
 
-    // persistir en DB y limpiar DB
+  const notaTicket = (m.nota ?? notasPorMesa[id] ?? "").trim();
+  const now = new Date();
+  const dateISO = businessKeyDate(now); // clave de negocio (ej: 2025-11-05)
+
+  const ticket = {
+    id: `${Date.now()}_${id}`,
+    mesa: id,
+    ts: now.getTime(),
+    dateISO,
+    fecha: formatFechaPE(now),
+    items,
+    total: totalTicket,
+    nota: notaTicket,
+  };
+
+  // 1️⃣ Actualizar dashboard local inmediatamente
+  setVentasDia((prev) => [ticket, ...prev]);
+
+  // 2️⃣ Guardar en Supabase
+  try {
     await cobrarMesaDB({
       mesa: id,
-      dateISO: ticket.dateISO,
+      dateISO,
       fecha: now.toISOString(),
       items,
       total: totalTicket,
       nota: notaTicket,
     });
+  } catch (e) {
+    console.error("[cobrarMesa] Error al cobrar", e);
+    // Si quieres evitar duplicados, podrías aquí revertir el setVentasDia,
+    // pero de momento dejamos el log para poder ver posibles errores.
+    return;
+  }
 
-    // limpiar UI
-    setPedidosPorMesa((prev) => {
-      const cp = { ...prev };
-      delete cp[id];
-      return cp;
-    });
-    setEstadoMesa((prev) => ({ ...prev, [id]: "cobrado" }));
-    setNotasPorMesa((prev) => {
-      const cp = { ...prev };
-      delete cp[id];
-      return cp;
-    });
-    if (mesaSel === id) setAbiertas({});
-  };
+  // 3️⃣ Limpiar la mesa de la memoria (para que desaparezca del cajero)
+  setPedidosPorMesa((prev) => {
+    const cp = { ...prev };
+    delete cp[id];
+    return cp;
+  });
+
+  setEstadoMesa((prev) => ({
+    ...prev,
+    [id]: "cobrado",
+  }));
+
+  setNotasPorMesa((prev) => {
+    const cp = { ...prev };
+    delete cp[id];
+    return cp;
+  });
+
+  // Si justo estabas mirando esa mesa como mesero,
+  // reseteamos las categorías abiertas para el próximo uso
+  if (mesaSel === id) {
+    setAbiertas({});
+  }
+};
+ 
 
   // Métricas admin (desde ventasDia)
   const ticketsDay = ventasDia;
