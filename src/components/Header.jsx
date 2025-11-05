@@ -1,16 +1,17 @@
 import React from "react";
 
+// Cómo se muestran los textos de rol
 const ROLE_LABELS = {
   ADMINISTRADOR: "ADMIN",
   COCINERO: "COCINA",
-  // MESERO y CAJERO se dejan igual
+  // MESERO y CAJERO se muestran tal cual
 };
 
 export default function Header({ mesaSel, rol, createTakeaway, onLogout }) {
   const isMesero = rol === "MESERO";
   const roleText = ROLE_LABELS[rol] || rol || "SIN ROL";
 
-  // Estilo común para el chip de rol y el botón Salir
+  // Estilo base para los “chips” (rol y salir)
   const baseBtnStyle = {
     textTransform: "uppercase",
     fontWeight: 700,
@@ -36,17 +37,15 @@ export default function Header({ mesaSel, rol, createTakeaway, onLogout }) {
 
       {/* Controles de la derecha */}
       <div className="right-controls">
-                
-        {/* Estos dos SOLO para MESERO */}
+        {/* SOLO MESERO: botón LLEVAR (primero) */}
         {isMesero && (
-            <button
-              className="carry-btn"
-              onClick={createTakeaway}
-              title="Crear pedido para llevar"
-            >
-              🛍️D
-            </button>
-
+          <button
+            className="carry-btn"
+            onClick={createTakeaway}
+            title="Crear pedido para llevar"
+          >
+            🛍️D
+          </button>
         )}
 
         {/* Chip con el rol (MESERO / COCINA / CAJERO / ADMIN) */}
@@ -61,7 +60,7 @@ export default function Header({ mesaSel, rol, createTakeaway, onLogout }) {
           {roleText}
         </span>
 
-        {/* Botón salir (siempre visible) */}
+        {/* Botón salir (siempre visible, último) */}
         {onLogout && (
           <button
             onClick={onLogout}

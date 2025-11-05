@@ -18,19 +18,43 @@ body { margin: 0; font-family: Segoe UI, Arial, sans-serif; color: var(--texto);
 .app { display: flex; flex-direction: column; min-height: 100%; }
 
 /* ====== Header ====== */
-.header{
-  display:flex; align-items:center; justify-content:space-between;
-  flex-wrap: wrap;
-  padding:14px 18px; background:#fff; border-bottom:1px solid var(--gris-borde);
-  position: sticky; top: 0; z-index: 30;
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 30;
 }
 
-.brand{ display:flex; align-items:center; gap:12px; }
-.logo{ height:44px; width:44px; object-fit:contain; }
-.title{ margin:0; font-size:26px; letter-spacing:.5px; }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo {
+  height: 42px;
+  width: 42px;
+  object-fit: contain;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
 .mesa-info{ display:flex; align-items:center; gap:8px; font-size:16px; }
 .mesa-info strong{ font-size:18px; }
-.right-controls{ display:flex; align-items:center; gap:12px; }
+.right-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;      /* que NO se vayan a segunda línea */
+}
 .role-select{ padding:8px 10px; border:1px solid var(--gris-borde); border-radius:8px; background:#fff; }
 
 /* ====== Layout principal ====== */
@@ -251,26 +275,25 @@ body { margin: 0; font-family: Segoe UI, Arial, sans-serif; color: var(--texto);
 @media (max-width: 860px){
   .content.cajero.one-col{ grid-template-columns:1fr; }
 }
-/* Botón Para llevar: que nunca se oculte en móviles */
-.carry-btn{
+/* Botón “LLEVAR” del mesero */
+.carry-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 10px;
-  border: 1px solid var(--gris-borde);
+  padding: 6px 10px;
+  border: 2px solid #e5e7eb;
   border-radius: 8px;
   background: #fff;
   font-weight: 700;
   cursor: pointer;
 }
 
-@media (max-width: 860px){
-  .right-controls{ 
-    flex-wrap: wrap;            /* permite que baje a la línea siguiente */
-    row-gap: 6px;
+@media (max-width: 768px) {
+  .title {
+    font-size: 18px;
   }
-  .title{ flex: 1 1 auto; }     /* da espacio para que no tape al botón */
-  .carry-btn{ 
-    order: 2;                   /* si hace falta, que se mueva debajo */
+
+  .right-controls {
+    gap: 6px;
   }
 }
