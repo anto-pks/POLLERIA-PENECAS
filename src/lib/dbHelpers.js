@@ -100,16 +100,17 @@ export async function sendDiffToKitchen(mesaId, draft, prevSent) {
 }
 
 /** Cobrar: inserta venta y limpia mesa */
+/** Cobrar: inserta venta y limpia mesa */
 export async function cobrarMesaDB({ mesa, dateISO, fecha, items, total, nota }) {
   // 1️⃣ Guarda ticket en "ventas"
   const { error: eInsert } = await supabase.from("ventas").insert({
-    mesa,
-    ts: Date.now(),      // timestamp en ms
-    dateiso: dateISO,    // columna se llama "dateiso" (todo minúscula)
-    fecha,               // ISO string
-    total,
-    nota,
-    data: items,         // columna jsonb se llama "data"
+    mesa,               // int4
+    ts: Date.now(),     // int8, timestamp en ms
+    dateiso: dateISO,   // 👈 OJO: columna se llama dateiso (todo minúscula)
+    fecha,              // timestamptz (ISO string)
+    total,              // numeric
+    nota,               // text
+    data: items,        // jsonb
   });
 
   if (eInsert) {
@@ -117,11 +118,11 @@ export async function cobrarMesaDB({ mesa, dateISO, fecha, items, total, nota })
     throw eInsert;
   }
 
-  // 2️⃣ Borra items de la mesa (best effort)
+  // 2️⃣ Borra items de la mesa
   const { error: eItems } = await supabase
     .from("mesa_items")
     .delete()
-    .eq("mesa_id", mesa);   // usa el mismo campo que usas en getMesaSnapshot
+    .eq("mesa_id", mesa);   // 👈 campo correcto
 
   if (eItems) {
     console.error("[cobrarMesaDB] Error borrando mesa_items", eItems);
@@ -137,6 +138,7 @@ export async function cobrarMesaDB({ mesa, dateISO, fecha, items, total, nota })
     console.error("[cobrarMesaDB] Error borrando mesa", eMesa);
   }
 }
+
 /** Lee ventas recientes; el filtro por día se hace en el frontend */
 export async function getVentasDelDia() {
   const { data, error } = await supabase

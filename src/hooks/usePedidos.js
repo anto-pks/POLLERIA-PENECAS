@@ -324,7 +324,7 @@ const marcarListo = async (id, nombreKey, qty) => {
   await setEstadoMesaDB(id, "listo");
 };
 // Cajero: cobrar y limpiar
-  const cobrarMesa = async (id) => {
+const cobrarMesa = async (id) => {
   const m = ensureMesa(pedidosPorMesa[id]);
   const s = m.sent || {};
 
@@ -343,6 +343,23 @@ const marcarListo = async (id, nombreKey, qty) => {
   const now = new Date();
   const dateISO = businessKeyDate(now); // clave de negocio (ej: 2025-11-05)
 
+  // 1️⃣ Intentar guardar en Supabase primero
+  try {
+    await cobrarMesaDB({
+      mesa: id,
+      dateISO,                    // 👈 aquí está bien
+      fecha: now.toISOString(),
+      items,
+      total: totalTicket,
+      nota: notaTicket,
+    });
+  } catch (e) {
+    console.error("[cobrarMesa] Error al cobrar", e);
+    alert("No se pudo guardar la venta en Supabase. Revisa permisos de la tabla 'ventas'.");
+    return; // NO seguimos, para no duplicar ni limpiar mal
+  }
+
+  // 2️⃣ Si lo anterior salió bien, armamos el ticket para mostrar en la UI
   const ticket = {
     id: `${Date.now()}_${id}`,
     mesa: id,
@@ -354,27 +371,10 @@ const marcarListo = async (id, nombreKey, qty) => {
     nota: notaTicket,
   };
 
-  // 1️⃣ Actualizar dashboard local inmediatamente
+  // 3️⃣ Actualizar dashboard local
   setVentasDia((prev) => [ticket, ...prev]);
 
-  // 2️⃣ Guardar en Supabase
-  try {
-    await cobrarMesaDB({
-      mesa: id,
-      dateISO,
-      fecha: now.toISOString(),
-      items,
-      total: totalTicket,
-      nota: notaTicket,
-    });
-  } catch (e) {
-    console.error("[cobrarMesa] Error al cobrar", e);
-    // Si quieres evitar duplicados, podrías aquí revertir el setVentasDia,
-    // pero de momento dejamos el log para poder ver posibles errores.
-    return;
-  }
-
-  // 3️⃣ Limpiar la mesa de la memoria (para que desaparezca del cajero)
+  // 4️⃣ Limpiar la mesa en memoria
   setPedidosPorMesa((prev) => {
     const cp = { ...prev };
     delete cp[id];
@@ -392,14 +392,10 @@ const marcarListo = async (id, nombreKey, qty) => {
     return cp;
   });
 
-  // Si justo estabas mirando esa mesa como mesero,
-  // reseteamos las categorías abiertas para el próximo uso
   if (mesaSel === id) {
     setAbiertas({});
   }
 };
- 
-
   // Métricas admin (desde ventasDia)
   const ticketsDay = ventasDia;
 
