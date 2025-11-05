@@ -100,7 +100,6 @@ export async function sendDiffToKitchen(mesaId, draft, prevSent) {
 }
 
 /** Cobrar: inserta venta y limpia mesa */
-/** Cobrar: inserta venta y limpia mesa */
 export async function cobrarMesaDB({ mesa, dateISO, fecha, items, total, nota }) {
   // 1️⃣ Guarda ticket en "ventas"
   const { error: eInsert } = await supabase.from("ventas").insert({
@@ -138,9 +137,6 @@ export async function cobrarMesaDB({ mesa, dateISO, fecha, items, total, nota })
     console.error("[cobrarMesaDB] Error borrando mesa", eMesa);
   }
 }
-
-/** Lee todas las ventas de un día de negocio (por dateISO) */
-/** Lee todas las ventas de un día de negocio (por dateISO) */
 /** Lee ventas recientes; el filtro por día se hace en el frontend */
 export async function getVentasDelDia() {
   const { data, error } = await supabase
