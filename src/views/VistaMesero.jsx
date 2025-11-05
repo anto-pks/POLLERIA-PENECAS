@@ -31,23 +31,43 @@ export default function VistaMesero({
   return (
     <div className="content">
       <div className="menu"> 
-        {CATS.map((cat)=>(
+        {CATS.map((cat) => (
           <div key={cat.key} className="cat-block">
-            <div className="cat-head">
+            <div
+              className="cat-head"
+              onClick={() =>
+                setAbiertas((p) => ({ ...p, [cat.key]: !p[cat.key] }))
+              }
+            >
               <span className="cat-name">{cat.label}</span>
-              <button className="cat-toggle" onClick={()=>setAbiertas(p=>({...p,[cat.key]:!p[cat.key]}))}>
-                {abiertas[cat.key]?"−":"+"}
+
+              <button
+                className="cat-toggle"
+                onClick={(e) => {
+                  e.stopPropagation(); // para que no se dispare también el click del div
+                  setAbiertas((p) => ({ ...p, [cat.key]: !p[cat.key] }));
+                }}
+              >
+                {abiertas[cat.key] ? "−" : "+"}
               </button>
             </div>
+
             {abiertas[cat.key] && (
               <div className="cat-items">
-                {cat.items.map((p)=>(
-                  <ProductRow key={p.nombre} catKey={cat.key} prod={p} draft={draft} setCant={(...args)=>window.setCant(...args)} />
+                {cat.items.map((p) => (
+                  <ProductRow
+                    key={p.nombre}
+                    catKey={cat.key}
+                    prod={p}
+                    draft={draft}
+                    setCant={(...args) => window.setCant(...args)}
+                  />
                 ))}
               </div>
             )}
           </div>
         ))}
+
       </div>
 
       <aside className="ticket">
