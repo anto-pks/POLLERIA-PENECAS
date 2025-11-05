@@ -8,24 +8,25 @@ import VistaCocinero from "./views/VistaCocinero";
 import VistaCajero from "./views/VistaCajero";
 import VistaAdmin from "./views/VistaAdmin";
 
-export default function PolleriaPOS() {
+export default function PolleriaPOS({ rolSupabase, onLogout }) {
   const h = usePedidos();
 
   // Exponer setCant global (para ProductRow)
   window.setCant = h.setCant;
 
+  // Rol efectivo: si viene de Supabase, usamos ese
+  const rol = rolSupabase || h.rol;
+
   return (
     <div className="app">
       <Header
         mesaSel={h.mesaSel}
-        rol={h.rol}
-        requestRole={h.requestRole}
-        isTakeawayId={h.isTakeawayId}
-        TAKEAWAY_BASE={h.TAKEAWAY_BASE}
+        rol={rol}
         createTakeaway={h.createTakeaway}
+        onLogout={onLogout}
       />
 
-      {h.rol === "MESERO" && (
+      {rol === "MESERO" && (
         <VistaMesero
           CATS={CATS}
           abiertas={h.abiertas}
@@ -43,11 +44,11 @@ export default function PolleriaPOS() {
           TAKEAWAY_BASE={h.TAKEAWAY_BASE}
           pedidosPorMesa={h.pedidosPorMesa}
           setMesaSel={h.setMesaSel}
-          cobrarMesa={h.cobrarMesa} 
+          cobrarMesa={h.cobrarMesa}
         />
       )}
 
-      {h.rol === "COCINERO" && (
+      {rol === "COCINERO" && (
         <VistaCocinero
           MESAS_TOTAL={h.MESAS_TOTAL}
           pedidosPorMesa={h.pedidosPorMesa}
@@ -61,7 +62,7 @@ export default function PolleriaPOS() {
         />
       )}
 
-      {h.rol === "CAJERO" && (
+      {rol === "CAJERO" && (
         <VistaCajero
           MESAS_TOTAL={h.MESAS_TOTAL}
           pedidosPorMesa={h.pedidosPorMesa}
@@ -76,7 +77,7 @@ export default function PolleriaPOS() {
         />
       )}
 
-      {h.rol === "ADMINISTRADOR" && (
+      {rol === "ADMINISTRADOR" && (
         <VistaAdmin
           ventasDia={h.ventasDia}
           bizKey={h.bizKey}
@@ -86,32 +87,12 @@ export default function PolleriaPOS() {
         />
       )}
 
-      {(h.rol === "MESERO") && (
-        <MesaBar
-          MESAS_TOTAL={h.MESAS_TOTAL}
-          mesaSel={h.mesaSel}
-          setMesaSel={h.setMesaSel}
-          mesaOcupada={h.mesaOcupada}
-        />
-      )}
-
-      {h.showAuth && (
-        <div className="auth-backdrop">
-          <div className="auth-modal">
-            <h3>Ingresar clave ({h.pendingRole})</h3>
-            <input
-              type="password"
-              value={h.passInput}
-              onChange={(e)=>h.setPassInput(e.target.value)}
-              placeholder="****"
-            />
-            <div className="auth-actions">
-              <button className="btn-action charge" onClick={h.confirmRole}>Entrar</button>
-              <button className="btn-action" onClick={()=>h.setShowAuth(false)}>Cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <MesaBar
+        MESAS_TOTAL={h.MESAS_TOTAL}
+        mesaSel={h.mesaSel}
+        setMesaSel={h.setMesaSel}
+        mesaOcupada={h.mesaOcupada}
+      />
     </div>
   );
 }
