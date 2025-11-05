@@ -36,17 +36,17 @@ export default function Header({ mesaSel, rol, createTakeaway, onLogout }) {
 
       {/* Controles de la derecha */}
       <div className="right-controls">
+                
         {/* Estos dos SOLO para MESERO */}
         {isMesero && (
-          <>
             <button
               className="carry-btn"
               onClick={createTakeaway}
               title="Crear pedido para llevar"
             >
-              🛍️Llevar
+              🛍️D
             </button>
-          </>
+
         )}
 
         {/* Chip con el rol (MESERO / COCINA / CAJERO / ADMIN) */}
@@ -65,7 +65,7 @@ export default function Header({ mesaSel, rol, createTakeaway, onLogout }) {
         {onLogout && (
           <button
             onClick={onLogout}
-            title="Cerrar sesión"
+            title="Salir"
             style={{
               ...baseBtnStyle,
               background: "#fee2e2",
@@ -77,7 +77,7 @@ export default function Header({ mesaSel, rol, createTakeaway, onLogout }) {
             onMouseEnter={(e) => (e.target.style.background = "#fecaca")}
             onMouseLeave={(e) => (e.target.style.background = "#fee2e2")}
           >
-            Salir
+            SALIR
           </button>
         )}
       </div>
