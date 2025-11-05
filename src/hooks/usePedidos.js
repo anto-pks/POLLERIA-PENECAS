@@ -37,21 +37,23 @@ export function usePedidos() {
 useEffect(() => {
   async function loadVentasDia() {
     try {
-      const dateISO = businessKeyDate(); // mismo criterio que usas al cobrar
-      const rows = await getVentasDelDia(dateISO);
+      const dayKey = businessKeyDate(); // ej: "2025-11-05"
+      const rows = await getVentasDelDia();
 
-      const mapped = rows
+      const filtered = (rows || []).filter((r) => r.dateiso === dayKey);
+
+      const mapped = filtered
         .map((row) => ({
           id: row.id || `${row.fecha}_${row.mesa}`,
           mesa: row.mesa,
-          ts: new Date(row.fecha).getTime(),
-          dateISO: row.dateISO,
-          fecha: formatFechaPE(row.fecha), // bonito formato para mostrar
-          items: row.items || [],
+          ts: row.ts || new Date(row.fecha).getTime(),
+          dateISO: row.dateiso,
+          fecha: formatFechaPE(row.fecha),
+          items: row.data || [],
           total: row.total || 0,
           nota: row.nota || "",
         }))
-        .sort((a, b) => b.ts - a.ts); // últimos tickets primero
+        .sort((a, b) => b.ts - a.ts);
 
       setVentasDia(mapped);
     } catch (e) {
@@ -61,6 +63,8 @@ useEffect(() => {
 
   loadVentasDia();
 }, []);
+
+
 
 useEffect(() => {
   let unsubscribe;

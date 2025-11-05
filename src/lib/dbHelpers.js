@@ -102,32 +102,44 @@ export async function sendDiffToKitchen(mesaId, draft, prevSent) {
 /** Cobrar: inserta venta y limpia mesa */
 export async function cobrarMesaDB({ mesa, dateISO, fecha, items, total, nota }) {
   // 1️⃣ Guarda ticket en ventas
-  await supabase.from("ventas").insert({
+  const {error} = await supabase.from("ventas").insert({
     mesa,
+    ts: Date.now,
+    dateiso: dateISO,
     fecha,
-    dateISO,
     total,
     nota,
-    items,
+    data: items,
   });
 
+  if (error) {
+    console.error("[cobrarMesaDB] Error insertando venta", error);
+    throw error;
+  }
+
   // 2️⃣ Elimina todos los items asociados
-  await supabase.from("mesa_items").delete().eq("mesa", mesa);
+  await supabase.from("mesa_items").delete().eq("mesa_id", mesa);
 
   // 3️⃣ ⚡ Elimina la mesa completa (esto dispara el DELETE realtime)
   await supabase.from("mesas").delete().eq("id", mesa);
 }
 /** Lee todas las ventas de un día de negocio (por dateISO) */
-export async function getVentasDelDia(dateISO) {
+/** Lee todas las ventas de un día de negocio (por dateISO) */
+/** Lee ventas recientes; el filtro por día se hace en el frontend */
+export async function getVentasDelDia() {
   const { data, error } = await supabase
     .from("ventas")
-    .select("id, mesa, fecha, dateISO, items, total, nota")
-    .eq("dateISO", dateISO)
-    .order("fecha", { ascending: false });
+    .select("id, mesa, fecha, dateiso, total, nota, data, ts")
+    .order("fecha", { ascending: false })
+    .limit(200);
 
-  if (error) throw error;
+  if (error) {
+    console.error("[getVentasDelDia] Error", error);
+    throw error;
+  }
   return data || [];
 }
+
 
 /** ========== UTILIDADES PARA “TODAS LAS MESAS” ========== */
 
