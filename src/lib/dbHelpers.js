@@ -75,27 +75,34 @@ export async function setNotaMesa(mesaId, nota) {
 /** Sube delta de draft contra prevSent a mesa_items y marca mesa enviada */
 export async function sendDiffToKitchen(mesaId, draft, prevSent) {
   const rows = [];
+
   Object.entries(draft || {}).forEach(([nombre, { precio, cantidad } = {}]) => {
-    const ya = Number(prevSent?.[nombre]?.cantidad || 0);
-    const next = Number(cantidad || 0);
-    if (next > 0) {
+    const ya = Number(prevSent?.[nombre]?.cantidad || 0); // lo que ya estaba enviado
+    const delta = Number(cantidad || 0);                  // lo nuevo en borrador
+    const nuevaCantidad = ya + delta;                     // TOTAL acumulado
+
+    if (nuevaCantidad > 0) {
       rows.push({
         mesa_id: mesaId,
         nombre,
         precio: Number(precio || 0),
-        cantidad: next
+        cantidad: nuevaCantidad, // 👈 ahora guardamos el total (ya + delta)
       });
     }
   });
 
   if (rows.length) {
-    const { error } = await supabase.from('mesa_items').upsert(rows);
+    const { error } = await supabase.from("mesa_items").upsert(rows);
     if (error) throw error;
   }
 
   const { error: e2 } = await supabase
-    .from('mesas')
-    .upsert({ id: mesaId, estado: 'enviado', updated_at: new Date().toISOString() });
+    .from("mesas")
+    .upsert({
+      id: mesaId,
+      estado: "enviado",
+      updated_at: new Date().toISOString(),
+    });
   if (e2) throw e2;
 }
 
