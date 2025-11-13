@@ -1,21 +1,39 @@
 import React, { useMemo } from "react";
 
 export default function VistaAdmin({
-  ventasDia, bizKey, brasaOctavos, parrillaControl, gaseosaControl
+  ventasDia, fechaNegocio, setFechaNegocio, brasaOctavos, parrillaControl, bebidasControl,
 }) {
   const totalDia = useMemo(()=>ventasDia.reduce((s,t)=>s+(t.total||0),0),[ventasDia]);
   return (
     <div className="content admin">
       <div className="admin-left">
         <h2>Administrador</h2>
-        <div className="filters" style={{ alignItems:"end", justifyContent:"space-between" }}>
-          <div className="dash" style={{margin:0}}>
-            <div className="dash-item"><span>Día de negocio</span><strong>{bizKey.replace("ventas_","")}</strong></div>
+        {/* Barra superior con selector de fecha */}
+        <div className="filters" style={{ alignItems: "end", justifyContent: "space-between" }}>
+          <div className="dash" style={{ margin: 0 }}>
+            <div className="dash-item"><span>Día de negocio</span><strong>{fechaNegocio}</strong></div>
             <div className="dash-item"><span>Tickets</span><strong>{ventasDia.length}</strong></div>
             <div className="dash-item"><span>Ventas Totales</span><strong>S/ {totalDia}</strong></div>
           </div>
         </div>
-
+        {/* Selector de fecha */}
+          <div>
+            <label style={{ display: "block", fontSize: 12, marginBottom: 4, color: "#374151" }}>
+              Ver día:
+            </label>
+            <input
+              type="date"
+              value={fechaNegocio}
+              onChange={(e) => setFechaNegocio(e.target.value)}
+              style={{
+                padding: "8px 10px",
+                border: "1px solid #e5e7eb",
+                borderRadius: 8,
+                background: "#fff",
+              }}
+            />
+          </div>
+        
         <div className="panel">
           <h3>Pollo a la Brasa (equivalencias)</h3>
           <p>Total: <strong>{brasaOctavos.pollos} pollo(s)</strong> y <strong>{brasaOctavos.restoOctavos} octavo(s)</strong> <span className="muted">(= {brasaOctavos.totalOctavos} octavos)</span></p>
@@ -35,12 +53,17 @@ export default function VistaAdmin({
         <div className="panel">
           <h3>Control de Gaseosas</h3>
           <ul className="k-list">
-            <li className="k-row"><span>Personal</span><strong>{gaseosaControl.PERSONAL}</strong></li>
-            <li className="k-row"><span>Gordita</span><strong>{gaseosaControl.GORDITA}</strong></li>
-            <li className="k-row"><span>Litro</span><strong>{gaseosaControl.LITRO}</strong></li>
-            <li className="k-row"><span>2 Litros (aprox)</span><strong>{gaseosaControl["2 LITROS"]}</strong></li>
+            <li className="k-row"><span>Personales de Vidrio (INK, CC, FTA)</span><strong>{bebidasControl.personalesVidrio}</strong></li>
+            <li className="k-row"><span>Personales Descartables (INK, CC, FTA)</span><strong>{bebidasControl.personalesDesc}</strong></li>
+            <li className="k-row"><span>Personal Concordia</span><strong>{bebidasControl.personalConcordia}</strong></li>
+            <li className="k-row"><span>Gordita</span><strong>{bebidasControl.gordita}</strong></li>
+            <li className="k-row"><span>Gaseosa Litro</span><strong>{bebidasControl.gaseosaLitro}</strong></li>
+            <li className="k-row"><span>Pepsi Litro</span><strong>{bebidasControl.pepsiLitro}</strong></li>
+            <li className="k-row"><span>Gaseosa 1.5 LT (INK, CC)</span><strong>{bebidasControl.gaseosa15}</strong></li>
+            <li className="k-row"><span>Gaseosa Concordia 2 LT</span><strong>{bebidasControl.gaseosaConcordia}</strong></li>
+            <li className="k-row"><span>Gaseosa 2 LT (INK, CC)</span><strong>{bebidasControl.gaseosa2}</strong></li>
+            <li className="k-row"><span>Agua Mineral</span><strong>{bebidasControl.aguaMineral}</strong></li>
           </ul>
-          <p className="muted" style={{marginTop:6}}>* Conteo de 2L agrupa 2.0–2.25L para un vistazo rápido.</p>
         </div>
       </div>
 

@@ -150,20 +150,30 @@ export async function cobrarMesaDB({ id, mesa, dateISO, fecha, items, total, not
 }
 
 /** Lee ventas recientes; el filtro por día se hace en el frontend */
-export async function getVentasDelDia() {
+export async function getVentasDelDia(dayKey) {
   const { data, error } = await supabase
     .from("ventas")
     .select("id, mesa, fecha, dateiso, total, nota, data, ts")
-    .order("fecha", { ascending: false })
-    .limit(200);
+    .eq("dateiso", dayKey)           // 👈 filtro en la BD
+    .order("fecha", { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+// Lee ventas EXACTAS de un día de negocio (columna 'dateiso')
+export async function getVentasPorFecha(dateISO) {
+  const { data, error } = await supabase
+    .from("ventas")
+    .select("id, mesa, fecha, dateiso, total, nota, data, ts")
+    .eq("dateiso", dateISO)
+    .order("fecha", { ascending: false });
 
   if (error) {
-    console.error("[getVentasDelDia] Error", error);
+    console.error("[getVentasPorFecha] Error", error);
     throw error;
   }
   return data || [];
 }
-
 
 /** ========== UTILIDADES PARA “TODAS LAS MESAS” ========== */
 

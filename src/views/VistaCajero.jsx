@@ -1,4 +1,5 @@
-import React, { useMemo } from "react";
+import React, { useMemo ,useState} from "react";
+import ConfirmModal from "../components/ConfirmModal";
 
 export default function VistaCajero({
   MESAS_TOTAL, pedidosPorMesa, ensureMesa, estadoMesa,
@@ -26,6 +27,19 @@ export default function VistaCajero({
 
   const etiquetaMesa = (id) =>
     isTakeawayId(id) ? `LLEVAR ${id - TAKEAWAY_BASE}` : `Mesa #${id}`;
+  
+  const [confirmData, setConfirmData] = useState(null);
+
+  const handleCobrarClick = (id, totalMesa) => {
+    setConfirmData({ id, total: totalMesa });
+  };
+
+  const confirmCobro = () => {
+    if (confirmData) {
+      cobrarMesa(confirmData.id);
+      setConfirmData(null);
+    }
+  };
 
   return (
     <div className="content cajero one-col">
@@ -133,9 +147,16 @@ export default function VistaCajero({
                     <strong>S/ {totalMesa}</strong>
                   </div>
 
-                  <button className="btn-pay" onClick={() => cobrarMesa(n)}>
+                  <button className="btn-pay" onClick={() => handleCobrarClick(n, totalMesa)}>
                     Cobrar / Cerrar cuenta
                   </button>
+                  {/* modal de confirmación */}
+                  <ConfirmModal
+                    open={!!confirmData}
+                    total={confirmData?.total || 0}
+                    onCancel={() => setConfirmData(null)}
+                    onConfirm={confirmCobro}
+                  />
                 </div>
               );
             })}

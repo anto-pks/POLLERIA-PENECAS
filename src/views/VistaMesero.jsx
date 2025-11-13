@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import ProductRow from "../components/ProductRow";
+import ConfirmModal from "../components/ConfirmModal";
 
 export default function VistaMesero({
   CATS,
@@ -27,6 +28,7 @@ export default function VistaMesero({
       return has(mesa.draft) || has(mesa.sent);
     });
 
+    const [openCobro, setOpenCobro] = useState(false);
 
   return (
     <div className="content">
@@ -164,11 +166,28 @@ export default function VistaMesero({
           {Object.keys(sent).length > 0 && (
             <button
               className="btn-pay"
-              onClick={() => cobrarMesa(mesaSel)}
+              onClick={() => setOpenCobro(true)}
             >
               Cobrar / Cerrar cuenta
             </button>
           )}
+
+          <ConfirmModal
+            open={openCobro}
+            // textos ajustados para mesero
+            title="¿Cobrar y cerrar cuenta?"
+            subtitle={`Se cobrará S/ ${Number(totalSent || 0).toFixed(2)} al ${etiqueta}.`}
+            confirmLabel="Cobrar ahora"
+            // si no quieres mostrar monto dentro, puedes omitir 'total'
+            total={totalSent}
+            onCancel={() => setOpenCobro(false)}
+            onConfirm={() => {
+              setOpenCobro(false);
+              cobrarMesa(mesaSel);   // 👈 misma lógica de siempre
+            }}
+          />
+
+
         </div>
 
       </aside>

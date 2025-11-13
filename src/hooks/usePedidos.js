@@ -9,6 +9,7 @@ import {
   listMesasAbiertas,
   subscribeMesas,
   getVentasDelDia,
+  getVentasPorFecha,
 } from "../lib/dbHelpers";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -26,45 +27,13 @@ export function usePedidos() {
 
   // Ventas día (local, para dashboard)
   const [ventasDia, setVentasDia] = useState([]);
+  const [fechaNegocio, setFechaNegocio] = useState(businessKeyDate()); // "YYYY-MM-DD"
   const [bizKey, setBizKey] = useState(ventasKey());
   // dentro de useEffect de carga (src/hooks/usePedidos.js)
   
   // Notas por mesa
   const [notasPorMesa, setNotasPorMesa] = useState({});
   const notaInputRef = useRef(null);
-
-// Cargar tickets del día desde Supabase al iniciar
-useEffect(() => {
-  async function loadVentasDia() {
-    try {
-      const dayKey = businessKeyDate(); // ej: "2025-11-05"
-      const rows = await getVentasDelDia();
-
-      const filtered = (rows || []).filter((r) => r.dateiso === dayKey);
-
-      const mapped = filtered
-        .map((row) => ({
-          id: row.id || `${row.fecha}_${row.mesa}`,
-          mesa: row.mesa,
-          ts: row.ts || new Date(row.fecha).getTime(),
-          dateISO: row.dateiso,
-          fecha: formatFechaPE(row.fecha),
-          items: row.data || [],
-          total: row.total || 0,
-          nota: row.nota || "",
-        }))
-        .sort((a, b) => b.ts - a.ts);
-
-      setVentasDia(mapped);
-    } catch (e) {
-      console.error("[loadVentasDia] Error cargando ventas", e);
-    }
-  }
-
-  loadVentasDia();
-}, []);
-
-
 
 useEffect(() => {
   let unsubscribe;
@@ -198,6 +167,33 @@ useEffect(() => {
       if (typeof unsubscribeAll === "function") unsubscribeAll();
     };
   }, []);
+
+  // Cargar tickets del día (EN FUNCIÓN DE fechaNegocio)
+  useEffect(() => {
+    (async () => {
+      try {
+        const rows = await getVentasPorFecha(fechaNegocio);
+        const mapped = (rows || [])
+          .map((row) => ({
+            id: row.id || `${row.fecha}_${row.mesa}`,
+            mesa: row.mesa,
+            ts: row.ts || new Date(row.fecha).getTime(),
+            dateISO: row.dateiso,
+            fecha: formatFechaPE(row.fecha),
+            items: row.data || [],
+            total: row.total || 0,
+            nota: row.nota || "",
+          }))
+          .sort((a, b) => b.ts - a.ts);
+
+        setVentasDia(mapped);
+      } catch (e) {
+        console.error("[usePedidos] Error cargando ventas por fecha", e);
+        setVentasDia([]);
+      }
+    })();
+  }, [fechaNegocio]);
+
   // Helpers “para llevar”
   const isTakeawayId = (id) => Number(id) >= TAKEAWAY_BASE;
   const nextTakeawayId = () => {
@@ -422,18 +418,101 @@ const cobrarMesa = async (id) => {
     return acc;
   }, [ticketsDay]);
 
-  const gaseosaControl = useMemo(() => {
-    const acc = { PERSONAL: 0, GORDITA: 0, LITRO: 0, "2 LITROS": 0 };
-    for (const t of ticketsDay)
-      for (const it of t.items) {
-        const n = (it.nombre || "").toUpperCase();
-        if (n.includes("GASEOSA PERSONAL")) acc.PERSONAL += it.cantidad || 0;
-        else if (n.includes("GASEOSA GORDITA")) acc.GORDITA += it.cantidad || 0;
-        else if (n.includes("GASEOSA LITRO") || n.includes("GASEOSA INKA 1 LT")) acc.LITRO += it.cantidad || 0;
-        else if (n.includes("GASEOSA 2 LT") || n.includes("GASEOSA 2.25")) acc["2 LITROS"] += it.cantidad || 0;
+// usePedidos.js
+const bebidasControl = useMemo(() => {
+  const acc = {
+    personalesVidrio: 0,       // Personales de Vidrio (INK, CC, FTA)
+    personalesDesc: 0,         // Personales Descartables (INK, CC)
+    personalConcordia: 0,      // Personal Concordia
+    gordita: 0,                // Gordita
+    gaseosaLitro: 0,           // Gaseosa Litro (INKA LITRO)
+    pepsiLitro: 0,             // Pepsi Litro
+    gaseosa15: 0,              // Gaseosa 1.5 LT (INK, CC)
+    gaseosaConcordia2: 0,      // Gaseosa Concordia 2 LT
+    gaseosa2: 0,               // Gaseosa 2 LT (INK, CC) -> incluye 2.25
+    aguaMineral: 0,            // Agua Mineral
+  };
+
+  const is = (name, re) => re.test(name);
+
+  for (const t of ticketsDay) {
+    for (const it of t.items) {
+      const n = (it.nombre || "").toUpperCase();
+      const q = it.cantidad || 0;
+
+      // 1) Personales de Vidrio (INK, CC, FTA) -> "PERSONAL" sin "DESC"
+      if (
+        is(n, /\bPERSONAL\b/) &&
+        !is(n, /\bDESC\b/) &&
+        is(n, /\b(INKA|COCA|COCA COLA|FANTA)\b/)
+      ) {
+        acc.personalesVidrio += q;
+        continue;
       }
-    return acc;
-  }, [ticketsDay]);
+
+      // 2) Personales Descartables (INK, CC) -> contiene "PERSONAL DESC"
+      if (
+        is(n, /\bPERSONAL\b/) &&
+        is(n, /\bDESC\b/) &&
+        is(n, /\b(INKA|COCA|COCA COLA)\b/)
+      ) {
+        acc.personalesDesc += q;
+        continue;
+      }
+
+      // 3) Personal Concordia
+      if (is(n, /\bCONCORDIA\b.*\bPERSONAL\b/)) {
+        acc.personalConcordia += q;
+        continue;
+      }
+
+      // 4) Gordita
+      if (is(n, /\bGORDITA\b/)) {
+        acc.gordita += q;
+        continue;
+      }
+
+      // 5) Gaseosa Litro (INKA LITRO)
+      if (is(n, /\bINKA\b.*\bLITRO\b/)) {
+        acc.gaseosaLitro += q;
+        continue;
+      }
+
+      // 6) Pepsi Litro
+      if (is(n, /\bPEPSI\b.*\bLITRO\b/)) {
+        acc.pepsiLitro += q;
+        continue;
+      }
+
+      // 7) Gaseosa 1.5 LT (INK, CC)
+      if (is(n, /\b(INKA|COCA|COCA COLA)\b.*\b1\.?5\b.*\bLT\b/)) {
+        acc.gaseosa15 += q;
+        continue;
+      }
+
+      // 8) Gaseosa Concordia 2 LT
+      if (is(n, /\bCONCORDIA\b.*\b2\b.*\bLT\b/)) {
+        acc.gaseosaConcordia += q;
+        continue;
+      }
+
+      // 9) Gaseosa 2 LT (INK, CC) — agrupa 2.0 y 2.25
+      if (is(n, /\b(INKA|COCA|COCA COLA)\b.*\b2(\.25)?\b.*\bLT\b/)) {
+        acc.gaseosa2 += q;
+        continue;
+      }
+
+      // 10) Agua Mineral
+      if (is(n, /\bAGUA\b.*\bMINERAL\b/)) {
+        acc.aguaMineral += q;
+        continue;
+      }
+    }
+  }
+
+  return acc;
+}, [ticketsDay]);
+
 
   return {
     // constantes
@@ -456,6 +535,8 @@ const cobrarMesa = async (id) => {
     ventasDia,
     bizKey,
 
+    fechaNegocio,
+    setFechaNegocio,
     // notas
     notasPorMesa,
     guardarNotaMesa,
@@ -480,6 +561,6 @@ const cobrarMesa = async (id) => {
     // métricas
     brasaOctavos,
     parrillaControl,
-    gaseosaControl,
+    bebidasControl,
   };
 }

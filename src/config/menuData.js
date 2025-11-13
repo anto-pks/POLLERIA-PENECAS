@@ -74,8 +74,9 @@ export const CATS = [
     key: "BEBIDAS",
     label: "BEBIDAS",
     items: [
-      { nombre: "INKA PERSONAL", precio: 2 },
+      { nombre: "INKA PERSONAL VIDRIO", precio: 2 },
       { nombre: "INKA PERSONAL DESC", precio: 4 },
+      { nombre: "CONCORDIA PERSONAL", precio: 2 },
       { nombre: "GORDITA", precio: 4 },
       { nombre: "INKA LITRO", precio: 7 },
       { nombre: "PEPSI LITRO", precio: 5 },

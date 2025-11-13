@@ -80,10 +80,11 @@ export default function PolleriaPOS({ rolSupabase, onLogout }) {
       {rol === "ADMINISTRADOR" && (
         <VistaAdmin
           ventasDia={h.ventasDia}
-          bizKey={h.bizKey}
+          fechaNegocio={h.fechaNegocio}
+          setFechaNegocio={h.setFechaNegocio}
           brasaOctavos={h.brasaOctavos}
           parrillaControl={h.parrillaControl}
-          gaseosaControl={h.gaseosaControl}
+          bebidasControl={h.bebidasControl}
         />
       )}
 
