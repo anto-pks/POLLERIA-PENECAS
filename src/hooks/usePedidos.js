@@ -492,7 +492,7 @@ const bebidasControl = useMemo(() => {
 
       // 8) Gaseosa Concordia 2 LT
       if (is(n, /\bCONCORDIA\b.*\b2\b.*\bLT\b/)) {
-        acc.gaseosaConcordia += q;
+        acc.gaseosaConcordia2 += q;
         continue;
       }
 
