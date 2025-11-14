@@ -60,7 +60,7 @@ export default function VistaAdmin({
             <li className="k-row"><span>Gaseosa Litro</span><strong>{bebidasControl.gaseosaLitro}</strong></li>
             <li className="k-row"><span>Pepsi Litro</span><strong>{bebidasControl.pepsiLitro}</strong></li>
             <li className="k-row"><span>Gaseosa 1.5 LT (INK, CC)</span><strong>{bebidasControl.gaseosa15}</strong></li>
-            <li className="k-row"><span>Gaseosa Concordia 2 LT</span><strong>{bebidasControl.gaseosaConcordia}</strong></li>
+            <li className="k-row"><span>Gaseosa Concordia 2 LT</span><strong>{bebidasControl.gaseosaConcordia2}</strong></li>
             <li className="k-row"><span>Gaseosa 2 LT (INK, CC)</span><strong>{bebidasControl.gaseosa2}</strong></li>
             <li className="k-row"><span>Agua Mineral</span><strong>{bebidasControl.aguaMineral}</strong></li>
           </ul>
