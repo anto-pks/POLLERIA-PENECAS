@@ -14,7 +14,7 @@ import {
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ventasKey, businessKeyDate, formatFechaPE } from "../lib/fechas";
-import { BRASA_EQ, normalize, PARRILLA_MAIN } from "../config/mappings";
+import { BRASA_EQ, normalize, PARRILLA_MAIN, PARRILLA_EQ} from "../config/mappings";
 import { MESAS_TOTAL, ROLES, TAKEAWAY_BASE } from "../config/constants";
 
 export function usePedidos() {
