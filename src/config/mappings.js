@@ -18,3 +18,8 @@ export const PARRILLA_MAIN = (n) => {
   if (N.includes("CHULETA") || N.includes("CERDO")) return "CHULETA";
   return null;
 };
+export const PARRILLA_EQ = {
+  "PARRILLA PEQUEÑA": { POLLO: 1, CARNE: 0, CHULETA: 0 },
+  "PARRILLA MEDIANA": { POLLO: 1, CARNE: 1, CHULETA: 0 },
+  "PARRILLA FAMILIAR": { POLLO: 1, CARNE: 1, CHULETA: 1 },
+};

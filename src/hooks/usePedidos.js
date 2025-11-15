@@ -408,15 +408,37 @@ const cobrarMesa = async (id) => {
     return { pollos: Math.floor(oct / 8), restoOctavos: oct % 8, totalOctavos: oct };
   }, [ticketsDay]);
 
-  const parrillaControl = useMemo(() => {
-    const acc = { POLLO: 0, CARNE: 0, CHULETA: 0 };
-    for (const t of ticketsDay)
-      for (const it of t.items) {
-        const main = PARRILLA_MAIN(it.nombre);
-        if (main) acc[main] += it.cantidad || 0;
+const parrillaControl = useMemo(() => {
+  const acc = { POLLO: 0, CARNE: 0, CHULETA: 0 };
+
+  for (const t of ticketsDay) {
+    for (const it of t.items) {
+      const nombre = (it.nombre || "").toUpperCase();
+      const qty = it.cantidad || 0;
+
+      // 1️⃣ Primero usar mapeo simple (platos directos)
+      const main = PARRILLA_MAIN(nombre);
+      if (main) {
+        acc[main] += qty;
+        continue;
       }
-    return acc;
-  }, [ticketsDay]);
+
+      // 2️⃣ Luego revisar equivalencias para parrillas especiales
+      for (const key of Object.keys(PARRILLA_EQ)) {
+        if (nombre.includes(key)) {
+          const eq = PARRILLA_EQ[key];
+          acc.POLLO   += eq.POLLO   * qty;
+          acc.CARNE   += eq.CARNE   * qty;
+          acc.CHULETA += eq.CHULETA * qty;
+          break;
+        }
+      }
+    }
+  }
+
+  return acc;
+}, [ticketsDay]);
+
 
 // usePedidos.js
 const bebidasControl = useMemo(() => {
