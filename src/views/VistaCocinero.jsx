@@ -58,14 +58,16 @@ export default function VistaCocinero({
   const etiquetaMesa = (id) =>
     isTakeawayId(id) ? `LLEVAR ${id - TAKEAWAY_BASE}` : `Mesa #${id}`;
 
-  return (
-    <div className="content one-col">
-      <div className="kitchen">
-        <h2>Pedidos en Cocina</h2>
-        {mesas.length === 0 ? (
-          <p className="muted">No hay pedidos pendientes.</p>
-        ) : (
-          mesas.map((n) => {
+return (
+  <div className="content one-col">
+    <div className="kitchen">
+
+      {mesas.length === 0 ? (
+        <p className="muted">No hay pedidos pendientes.</p>
+      ) : (
+        // 👇 NUEVO CONTENEDOR GRID
+        <div className="k-grid">
+          {mesas.map((n) => {
             const m = ensureMesa(pedidosPorMesa[n]);
             const pend = pendientesMesa(n);
             const estado = estadoMesa[n] || "enviado";
@@ -81,8 +83,11 @@ export default function VistaCocinero({
                 <ul className="k-list">
                   {pend.map((it) => (
                     <li key={it.nombre} className="k-row">
-                      <span>{it.nombre}</span>
-                      <strong>x{it.cantidad}</strong>
+                      <div className="k-item-left">
+                        <strong className="k-qty">{it.cantidad}</strong>
+                        <span>{it.nombre}</span>
+                      </div>
+
                       <button
                         className="btn-action done"
                         onClick={() => marcarListo(n, it.nombre, it.cantidad)}
@@ -109,9 +114,11 @@ export default function VistaCocinero({
                 )}
               </div>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
+
 }

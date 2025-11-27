@@ -168,8 +168,23 @@ body { margin: 0; font-family: Segoe UI, Arial, sans-serif; color: var(--texto);
 
 .kitchen, .c-left{ background:#fff; border:1px solid var(--gris-borde); border-radius:14px; padding:14px; }
 .k-card, .charge-card, .ticket-card{ border:1px solid var(--gris-borde); border-radius:12px; padding:12px; margin-bottom:12px; background:#fff; }
+.k-grid{
+  display: grid;
+  grid-template-columns: 1fr;    /* móvil: 1 columna */
+  gap: 12px;
+}
 .k-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-.k-list{ list-style:none; margin:0; padding:0; }
+.k-item-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.k-qty{
+  font-weight:700;
+  font-size:16px;
+  min-width:20px;
+  text-align:center;
+}
 .k-row{ display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed var(--gris-borde); }
 .k-row:last-child{ border-bottom:none; }
 
@@ -202,7 +217,11 @@ body { margin: 0; font-family: Segoe UI, Arial, sans-serif; color: var(--texto);
   .content{ grid-template-columns: 1fr 340px; }
   .ticket{ top: 78px; }
 }
-
+@media (min-width: 900px){
+  .k-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 @media (max-width: 860px) {
   .header { padding: 10px 12px; }
   .title { font-size: 20px; }
