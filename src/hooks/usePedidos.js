@@ -277,17 +277,70 @@ useEffect(() => {
     setEstadoMesa((prev) => ({ ...prev, [mesaSel]: "enviado" }));
   };
 
-  // Pendientes para cocina (local, a partir de sent y ready)
-  const pendientesMesa = (id) => {
-    const m = ensureMesa(pedidosPorMesa[id]);
-    const s = m.sent || {}, r = m.ready || {};
-    const out = [];
-    Object.keys(s).forEach((nombre) => {
-      const q = (s[nombre]?.cantidad || 0) - (r[nombre]?.cantidad || 0);
-      if (q > 0) out.push({ nombre, precio: s[nombre].precio, cantidad: q });
-    });
-    return out;
-  };
+// Productos que NO van a cocina (solo caja)
+// Ajusta la lista según tus nombres reales
+const esSoloCaja = (nombre) => {
+  const n = (nombre || "").toUpperCase();
+
+  // === BEBIDAS ===
+  if (
+    n.includes("INKA PERSONAL VIDRIO") ||
+    n.includes("INKA PERSONAL DESC") ||
+    n.includes("CONCORDIA PERSONAL") ||
+    n.includes("GORDITA") ||
+    n.includes("INKA LITRO") ||
+    n.includes("PEPSI LITRO") ||
+    n.includes("INKA 1.5 LT") ||
+    n.includes("CONCORDIA 2 LT") ||
+    n.includes("INKA 2 LT") ||
+    n.includes("INKA 2.25 LT") ||
+    n.includes("JARRA DE CHICHA") ||
+    n.includes("JARRA DE MARACUYA") ||
+    n.includes("MEDIA JARRA DE CHICHA") ||
+    n.includes("MEDIA JARRA DE MARACUYA") ||
+    n.includes("VASO DE CHICHA") ||
+    n.includes("VASO DE MARACUYA") ||
+    n.includes("AGUA MINERAL")
+
+  ) {
+    return true;
+  }
+
+  // === OTROS ===
+  // Aquí mete lo que tengas en categoría OTROS
+  if (
+    n.includes("TAPER") ||
+    n.includes("CREMA")
+    // agrega más: || n.includes("…")
+  ) {
+    return true;
+  }
+
+  return false;
+};
+  
+// Pendientes para cocina (local, a partir de sent y ready)
+const pendientesMesa = (id) => {
+  const m = ensureMesa(pedidosPorMesa[id]);
+  const s = m.sent || {}, r = m.ready || {};
+  const out = [];
+
+  Object.keys(s).forEach((nombre) => {
+    // 🔴 si es bebida u "OTROS", no va a cocina
+    if (esSoloCaja(nombre)) return;
+
+    const q = (s[nombre]?.cantidad || 0) - (r[nombre]?.cantidad || 0);
+    if (q > 0) {
+      out.push({
+        nombre,
+        precio: s[nombre].precio,
+        cantidad: q,
+      });
+    }
+  });
+
+  return out;
+};
 
 const marcarListo = async (id, nombreKey, qty) => {
   if (qty <= 0) return;
