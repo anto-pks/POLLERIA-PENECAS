@@ -7,7 +7,7 @@ const ROLE_LABELS = {
   // MESERO y CAJERO se muestran tal cual
 };
 
-export default function Header({ mesaSel, rol, createTakeaway, onLogout }) {
+export default function Header({rol, createTakeaway, onLogout }) {
   const isMesero = rol === "MESERO";
   const roleText = ROLE_LABELS[rol] || rol || "SIN ROL";
 

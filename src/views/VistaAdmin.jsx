@@ -4,6 +4,10 @@ export default function VistaAdmin({
   ventasDia, fechaNegocio, setFechaNegocio, brasaOctavos, parrillaControl, bebidasControl,
 }) {
   const totalDia = useMemo(()=>ventasDia.reduce((s,t)=>s+(t.total||0),0),[ventasDia]);
+  const TAKEAWAY_BASE = 9000;
+  const etiquetaMesa = (id) =>
+    id >= TAKEAWAY_BASE ? `LLEVAR ${id - TAKEAWAY_BASE}` : `Mesa #${id}`;
+
   return (
     <div className="content admin">
       <div className="admin-left">
@@ -73,7 +77,7 @@ export default function VistaAdmin({
           <div className="tickets-list">
             {ventasDia.map((t)=>(
               <div key={t.id} className="ticket-card">
-                <div className="k-head"><strong>Mesa #{t.mesa}</strong><span className="muted">{t.fecha}</span></div>
+                <div className="k-head"><strong>{etiquetaMesa(t.mesa)}</strong><span className="muted">{t.fecha}</span></div>
                 <ul className="k-list">
                   {t.items.map((it)=>(
                     <li key={it.nombre} className="k-row">
