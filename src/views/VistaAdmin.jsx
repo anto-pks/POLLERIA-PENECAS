@@ -50,6 +50,9 @@ export default function VistaAdmin({
             <li className="k-row"><span>Pollo parrilla</span><strong>{parrillaControl.POLLO}</strong></li>
             <li className="k-row"><span>Carne parrilla</span><strong>{parrillaControl.CARNE}</strong></li>
             <li className="k-row"><span>Chuleta (cerdo)</span><strong>{parrillaControl.CHULETA}</strong></li>
+            <li className="k-row"><span>Combinado</span><strong>{parrillaControl.COMBINADO}</strong></li>
+            <li className="k-row"><span>Mixto</span><strong>{parrillaControl.MIXTO}</strong></li>
+            <li className="k-row"><span>Mollejitas</span><strong>{parrillaControl.MOLLEJITAS}</strong></li>
           </ul>
           <p className="muted" style={{marginTop:6}}>* Incluye parrillas especiales y <strong>Pollo Broaster</strong> como pollo parrilla.</p>
         </div>
