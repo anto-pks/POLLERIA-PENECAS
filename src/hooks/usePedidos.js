@@ -462,12 +462,24 @@ const cobrarMesa = async (id) => {
   }, [ticketsDay]);
 
 const parrillaControl = useMemo(() => {
-  const acc = { POLLO: 0, CARNE: 0, CHULETA: 0 };
+  const acc = { POLLO: 0, CARNE: 0, CHULETA: 0, COMBINADO: 0, MIXTO: 0 , MOLLEJITAS: 0};
 
   for (const t of ticketsDay) {
     for (const it of t.items) {
       const nombre = (it.nombre || "").toUpperCase();
       const qty = it.cantidad || 0;
+      // 🔥 NUEVO: detectar estos productos
+      if (nombre.includes("COMBINADO")) {
+        acc.COMBINADO += qty;
+      }
+
+      if (nombre.includes("MIXTO")) {
+        acc.MIXTO += qty;
+      }
+
+      if (nombre.includes("MOLLEJA")) {
+        acc.MOLLEJITAS += qty;
+      }
 
       // 1️⃣ Primero usar mapeo simple (platos directos)
       const main = PARRILLA_MAIN(nombre);
