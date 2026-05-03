@@ -477,7 +477,7 @@ const parrillaControl = useMemo(() => {
         acc.MIXTO += qty;
       }
 
-      if (nombre.includes("MOLLEJA")) {
+      if (nombre.includes("MOLLEJITAS")) {
         acc.MOLLEJITAS += qty;
       }
 
