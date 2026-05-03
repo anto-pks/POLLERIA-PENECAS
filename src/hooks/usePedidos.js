@@ -127,9 +127,11 @@ useEffect(() => {
 
         // 4) Actualizar pedidosPorMesa manteniendo el draft local si existe
         setPedidosPorMesa((prev) => {
-          const next = { ...prev };
+          const next = {}; // 🔥 IMPORTANTE: no copiar prev
+
           snaps.forEach(({ id, snap, nota }) => {
-            const prevMesa = prev[id] || { draft: {}, sent: {}, ready: {}, nota: "" };
+            const prevMesa = prev[id] || {};
+
             next[id] = {
               draft: prevMesa.draft || {},
               sent: snap.sent || {},
@@ -137,7 +139,8 @@ useEffect(() => {
               nota: nota ?? prevMesa.nota ?? "",
             };
           });
-          return next;
+
+          return next; // 🔥 elimina mesas que ya no existen
         });
 
         // 5) Actualizar notasPorMesa
