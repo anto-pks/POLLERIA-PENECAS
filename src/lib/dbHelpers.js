@@ -182,7 +182,6 @@ export async function listMesasAbiertas() {
   const { data, error } = await supabase
     .from('mesas')
     .select('id, estado, nota')
-    .neq('estado', 'cerrado') // 🔥 AGREGUE EL 03/05/26
     .order('id', { ascending: true });
   if (error) throw error;
   return data || [];

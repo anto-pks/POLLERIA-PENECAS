@@ -18,11 +18,16 @@ export default function VistaCocinero({
       .map(Number)
       .filter((id) => isTakeawayId(id));
 
-    // solo mesas con pendientes
-    return [...mesasNum, ...llevarIds].filter(
-      (n) => pendientesMesa(n).length > 0
-    );
-  }, [MESAS_TOTAL, pedidosPorMesa, isTakeawayId, pendientesMesa]);
+    // solo mesas con pendientes AGREGUE EL 03/05/26 🚫
+    return [...mesasNum, ...llevarIds].filter((n) => {
+      const estado = estadoMesa[n];
+
+      //  Si ya está cobrado, NO mostrar en cocina
+      if (estado === "cobrado") return false;
+
+      return pendientesMesa(n).length > 0;
+    });
+  }, [MESAS_TOTAL, pedidosPorMesa, isTakeawayId, pendientesMesa, estadoMesa]);
 
   // --- 2️⃣ Calcula el total de platos pendientes en toda la cocina ---
   const totalPendientes = useMemo(() => {
