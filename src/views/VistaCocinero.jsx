@@ -41,41 +41,21 @@ export default function VistaCocinero({
   // --- 3️⃣ Detecta si aumentaron los pendientes para sonar ---
   const prevTotalRef = useRef(0);
   const firstRunRef = useRef(true);
-  const prevSentRef = useRef({});
 
   useEffect(() => {
-    let hayNuevo = false;
+    if (firstRunRef.current) {
+      firstRunRef.current = false;
+      prevTotalRef.current = totalPendientes;
+      return;
+    }
 
-    mesas.forEach((idMesa) => {
-      const mesa = pedidosPorMesa[idMesa] || {};
-      const sentActual = mesa.sent || {};
-      const sentPrev = prevSentRef.current[idMesa] || {};
-
-      Object.keys(sentActual).forEach((item) => {
-        const actual = sentActual[item]?.cantidad || 0;
-        const previo = sentPrev[item]?.cantidad || 0;
-
-        if (actual > previo) {
-          hayNuevo = true;
-        }
-      });
-    });
-
-    if (!firstRunRef.current && hayNuevo) {
+    if (totalPendientes > prevTotalRef.current) {
       const audio = new Audio("/sonidos/nuevo-pedido.mp3");
       audio.play().catch(() => {});
     }
 
-    firstRunRef.current = false;
-
-    // guardar snapshot actual
-    const snapshot = {};
-    mesas.forEach((idMesa) => {
-      snapshot[idMesa] = pedidosPorMesa[idMesa]?.sent || {};
-    });
-    prevSentRef.current = snapshot;
-
-  }, [pedidosPorMesa, mesas]);
+    prevTotalRef.current = totalPendientes;
+  }, [totalPendientes]);
 
   // --- 4️⃣ Mostrar pedidos pendientes ---
   const etiquetaMesa = (id) =>
