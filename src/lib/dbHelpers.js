@@ -190,19 +190,28 @@ export async function listMesasAbiertas() {
 /** Realtime: escucha cualquier cambio en la tabla mesas (alta/baja/cambio) */
 export function subscribeMesas(onChange) {
   const ch = supabase.channel('mesas-all');
+    // 🔹 ya lo tienes (mesas)
+    ch.on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'mesas' },
+      () => { try { onChange(); } catch(e){ console.error(e); } }
+    );
 
-  ch.on(
-    'postgres_changes',
-    { event: '*', schema: 'public', table: 'mesas' },
-    () => { try { onChange(); } catch(e){ console.error(e); } }
-  ).subscribe((status) => {
-    if (status === 'SUBSCRIBED') {
-      try { onChange(); } catch(e){ console.error(e); }
-    }
-  });
+    // 🔥 SOLO AGREGA ESTO (no cambies nada más)
+    ch.on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'mesa_items' },
+      () => { try { onChange(); } catch(e){ console.error(e); } }
+    );
 
-  return () => supabase.removeChannel(ch);
-}
+    ch.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        try { onChange(); } catch(e){ console.error(e); }
+      }
+    });
+
+    return () => supabase.removeChannel(ch);
+  }
 
 /** Realtime: escucha una mesa (mesas + mesa_items) y dispara onChange */
 export function subscribeMesa(mesaId, onChange) {
