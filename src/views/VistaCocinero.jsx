@@ -41,23 +41,41 @@ export default function VistaCocinero({
   // --- 3️⃣ Detecta si aumentaron los pendientes para sonar ---
   const prevTotalRef = useRef(0);
   const firstRunRef = useRef(true);
+  const prevSentRef = useRef({});
 
   useEffect(() => {
-    if (firstRunRef.current) {
-      // no sonar al entrar por primera vez
-      firstRunRef.current = false;
-    } else {
-      // si hay más pendientes que antes => sonido 🔔
-      if (totalPendientes > prevTotalRef.current) {
-        const audio = new Audio("/sonidos/nuevo-pedido.mp3");
-        audio.play().catch(() => {
-          console.warn("⚠️ No se pudo reproducir el sonido de nuevo pedido.");
-        });
-      }
+    let hayNuevo = false;
+
+    mesas.forEach((idMesa) => {
+      const mesa = pedidosPorMesa[idMesa] || {};
+      const sentActual = mesa.sent || {};
+      const sentPrev = prevSentRef.current[idMesa] || {};
+
+      Object.keys(sentActual).forEach((item) => {
+        const actual = sentActual[item]?.cantidad || 0;
+        const previo = sentPrev[item]?.cantidad || 0;
+
+        if (actual > previo) {
+          hayNuevo = true;
+        }
+      });
+    });
+
+    if (!firstRunRef.current && hayNuevo) {
+      const audio = new Audio("/sonidos/nuevo-pedido.mp3");
+      audio.play().catch(() => {});
     }
 
-    prevTotalRef.current = totalPendientes;
-  }, [totalPendientes]);
+    firstRunRef.current = false;
+
+    // guardar snapshot actual
+    const snapshot = {};
+    mesas.forEach((idMesa) => {
+      snapshot[idMesa] = pedidosPorMesa[idMesa]?.sent || {};
+    });
+    prevSentRef.current = snapshot;
+
+  }, [pedidosPorMesa, mesas]);
 
   // --- 4️⃣ Mostrar pedidos pendientes ---
   const etiquetaMesa = (id) =>
