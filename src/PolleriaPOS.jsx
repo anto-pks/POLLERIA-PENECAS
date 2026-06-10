@@ -1,5 +1,4 @@
 import React from "react";
-import { CATS } from "./config/menuData";
 import { usePedidos } from "./hooks/usePedidos";
 import Header from "./components/Header";
 import MesaBar from "./components/MesaBar";
@@ -9,10 +8,7 @@ import VistaCajero from "./views/VistaCajero";
 import VistaAdmin from "./views/VistaAdmin";
 
 export default function PolleriaPOS({ rolSupabase, onLogout }) {
-  const h = usePedidos();
-
-  // Exponer setCant global (para ProductRow)
-  window.setCant = h.setCant;
+  const h = usePedidos(rolSupabase);
 
   // Rol efectivo: si viene de Supabase, usamos ese
   const rol = rolSupabase || h.rol;
@@ -23,12 +19,13 @@ export default function PolleriaPOS({ rolSupabase, onLogout }) {
         mesaSel={h.mesaSel}
         rol={rol}
         createTakeaway={h.createTakeaway}
+        creandoLlevar={h.creandoLlevar}
         onLogout={onLogout}
       />
 
       {rol === "MESERO" && (
         <VistaMesero
-          CATS={CATS}
+          CATS={h.productosMenu}
           abiertas={h.abiertas}
           setAbiertas={h.setAbiertas}
           draft={h.draft}
@@ -45,6 +42,8 @@ export default function PolleriaPOS({ rolSupabase, onLogout }) {
           pedidosPorMesa={h.pedidosPorMesa}
           setMesaSel={h.setMesaSel}
           cobrarMesa={h.cobrarMesa}
+          setCant={h.setCant}
+          isCobrandoMesa={h.isCobrandoMesa}
         />
       )}
 
@@ -59,6 +58,7 @@ export default function PolleriaPOS({ rolSupabase, onLogout }) {
           marcarListo={h.marcarListo}
           isTakeawayId={h.isTakeawayId}
           TAKEAWAY_BASE={h.TAKEAWAY_BASE}
+          isCobrandoMesa={h.isCobrandoMesa}
         />
       )}
 
@@ -74,17 +74,25 @@ export default function PolleriaPOS({ rolSupabase, onLogout }) {
           bizKey={h.bizKey}
           isTakeawayId={h.isTakeawayId}
           TAKEAWAY_BASE={h.TAKEAWAY_BASE}
+          isCobrandoMesa={h.isCobrandoMesa}
         />
       )}
 
       {rol === "ADMINISTRADOR" && (
         <VistaAdmin
-          ventasDia={h.ventasDia}
           fechaNegocio={h.fechaNegocio}
           setFechaNegocio={h.setFechaNegocio}
           brasaOctavos={h.brasaOctavos}
           parrillaControl={h.parrillaControl}
           bebidasControl={h.bebidasControl}
+          chifaControl={h.chifaControl}
+          productosMenu={h.productosMenu}
+          adminResumen={h.adminResumen}
+          adminTicketsDetalle={h.adminTicketsDetalle}
+          adminDetalleVisible={h.adminDetalleVisible}
+          adminDetalleLoading={h.adminDetalleLoading}
+          cargarAdminTicketsDetalle={h.cargarAdminTicketsDetalle}
+          ocultarAdminTicketsDetalle={h.ocultarAdminTicketsDetalle}
         />
       )}
 

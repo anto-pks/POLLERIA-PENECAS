@@ -12,7 +12,9 @@ export default function VistaMesero({
   // para llevar
   isTakeawayId, TAKEAWAY_BASE,
   pedidosPorMesa, setMesaSel,
-  cobrarMesa
+  cobrarMesa,
+  setCant,
+  isCobrandoMesa = () => false,
 }) {
   const etiqueta = isTakeawayId(mesaSel)
     ? `Llevar ${mesaSel - TAKEAWAY_BASE}`
@@ -62,7 +64,7 @@ export default function VistaMesero({
                     catKey={cat.key}
                     prod={p}
                     draft={draft}
-                    setCant={(...args) => window.setCant(...args)}
+                    setCant={setCant}
                   />
                 ))}
               </div>
@@ -72,7 +74,7 @@ export default function VistaMesero({
 
       </div>
 
-      <aside className="ticket">
+      <aside className={`ticket ${isTakeawayId(mesaSel) ? "ticket-takeaway" : ""}`}>
         <div className="ticket-head">
           <h3>Pedido {etiqueta}</h3>
           <span className={`chip ${estadoMesa[mesaSel] || "tomando"}`}>{estadoMesa[mesaSel] || "tomando"}</span>
@@ -94,7 +96,7 @@ export default function VistaMesero({
               {takeawaysActivos.map((id) => (
                 <button
                   key={id}
-                  className="btn-action"
+                  className="btn-action takeaway-mini"
                   style={{ padding: "6px 10px", fontSize: 13 }}
                   onClick={() => setMesaSel(id)}
                 >
@@ -167,8 +169,9 @@ export default function VistaMesero({
             <button
               className="btn-pay"
               onClick={() => setOpenCobro(true)}
+              disabled={isCobrandoMesa(mesaSel)}
             >
-              Cobrar / Cerrar cuenta
+              {isCobrandoMesa(mesaSel) ? "Cobrando..." : "Cobrar / Cerrar cuenta"}
             </button>
           )}
 
@@ -181,7 +184,9 @@ export default function VistaMesero({
             // si no quieres mostrar monto dentro, puedes omitir 'total'
             total={totalSent}
             onCancel={() => setOpenCobro(false)}
+            confirmDisabled={isCobrandoMesa(mesaSel)}
             onConfirm={() => {
+              if (isCobrandoMesa(mesaSel)) return;
               setOpenCobro(false);
               cobrarMesa(mesaSel);   // 👈 misma lógica de siempre
             }}

@@ -7,7 +7,7 @@ const ROLE_LABELS = {
   // MESERO y CAJERO se muestran tal cual
 };
 
-export default function Header({rol, createTakeaway, onLogout }) {
+export default function Header({rol, createTakeaway, creandoLlevar = false, onLogout }) {
   const isMesero = rol === "MESERO";
   const roleText = ROLE_LABELS[rol] || rol || "SIN ROL";
 
@@ -42,9 +42,10 @@ export default function Header({rol, createTakeaway, onLogout }) {
           <button
             className="carry-btn"
             onClick={createTakeaway}
-            title="Crear pedido para llevar"
+            disabled={creandoLlevar}
+            title={creandoLlevar ? "Creando pedido..." : "Crear pedido para llevar"}
           >
-            🛍️D
+            {creandoLlevar ? "..." : "🛍️D"}
           </button>
         )}
 

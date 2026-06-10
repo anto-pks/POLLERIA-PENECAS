@@ -5,6 +5,7 @@ export default function VistaCajero({
   MESAS_TOTAL, pedidosPorMesa, ensureMesa, estadoMesa,
   cobrarMesa, notasPorMesa, ventasDia, bizKey,
   TAKEAWAY_BASE, isTakeawayId,
+  isCobrandoMesa = () => false,
 }) {
   const abiertas = useMemo(
     () => Array.from({ length: MESAS_TOTAL }, (_, i) => i + 1)
@@ -65,7 +66,7 @@ export default function VistaCajero({
             <h3 style={{ marginTop: 10 }}>Últimos tickets</h3>
             <div className="tickets-list">
               {ventasDia.map((t) => (
-                <div key={t.id} className="ticket-card">
+                <div key={t.id} className={`ticket-card ${isTakeawayId(t.mesa) ? "takeaway-card" : ""}`}>
                   <div className="k-head">
                     <strong>{etiquetaMesa(t.mesa)}</strong>
                     <span className="muted">{t.fecha}</span>
@@ -115,7 +116,7 @@ export default function VistaCajero({
               const notaVisible = (m.nota ?? notasPorMesa[n] ?? "").trim();
 
               return (
-                <div key={n} className="charge-card pretty">
+                <div key={n} className={`charge-card pretty ${isTakeawayId(n) ? "takeaway-card" : ""}`}>
                   <div className="k-head">
                     <div className="mesa-title">
                       <strong>{etiquetaMesa(n)}</strong>
@@ -147,13 +148,18 @@ export default function VistaCajero({
                     <strong>S/ {totalMesa}</strong>
                   </div>
 
-                  <button className="btn-pay" onClick={() => handleCobrarClick(n, totalMesa)}>
-                    Cobrar / Cerrar cuenta
+                  <button
+                    className="btn-pay"
+                    onClick={() => handleCobrarClick(n, totalMesa)}
+                    disabled={isCobrandoMesa(n)}
+                  >
+                    {isCobrandoMesa(n) ? "Cobrando..." : "Cobrar / Cerrar cuenta"}
                   </button>
                   {/* modal de confirmación */}
                   <ConfirmModal
                     open={!!confirmData}
                     total={confirmData?.total || 0}
+                    confirmDisabled={confirmData ? isCobrandoMesa(confirmData.id) : false}
                     onCancel={() => setConfirmData(null)}
                     onConfirm={confirmCobro}
                   />

@@ -380,3 +380,72 @@ body { margin: 0; font-family: Segoe UI, Arial, sans-serif; color: var(--texto);
 .btn-confirm:hover {
   filter: brightness(1.1);
 }
+
+
+/* ===== Diferenciar pedidos PARA LLEVAR con color suave ===== */
+.ticket-takeaway,
+.takeaway-card {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+}
+
+.takeaway-card .k-head strong,
+.ticket-takeaway .ticket-head h3 {
+  color: #1e3a8a;
+}
+
+.takeaway-mini {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+/* ===== Botones bloqueados para evitar doble cobro ===== */
+.btn-pay:disabled,
+.btn-confirm:disabled,
+.btn-cancel:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ===== Sonido cocina ===== */
+.sound-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  border: 1px solid var(--gris-borde);
+  border-radius: 10px;
+  background: #f8fafc;
+  font-size: 13px;
+}
+
+.btn-action.sound {
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 8px 10px;
+}
+
+.sound-ok { color: #047857; font-weight: 700; }
+.sound-warn { color: #92400e; font-weight: 700; }
+
+/* ===== Tiempo de cocina sin consultas extra ===== */
+.k-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.k-elapsed {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.carry-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}

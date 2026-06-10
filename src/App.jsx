@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import PolleriaPOS from "./PolleriaPOS";
 import { supabase } from "./lib/db";
 
-// Pantalla de login con logo
 function LoginScreen({ onLogin, loading, errorMsg }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,14 +33,12 @@ function LoginScreen({ onLogin, loading, errorMsg }) {
           textAlign: "center",
         }}
       >
-        {/* Logo */}
         <img
           src="/logo.png"
           alt="Logo Penecas"
           style={{ width: 80, height: 80, marginBottom: 6 }}
         />
 
-        {/* Nombre */}
         <h2
           style={{
             margin: 0,
@@ -151,33 +148,45 @@ export default function App() {
 
   useEffect(() => {
     let mounted = true;
+    let subscription = null;
 
-    // Revisar si ya hay sesión al cargar
-    supabase.auth.getUser().then(({ data, error }) => {
-      if (!mounted) return;
-      if (error) {
-        console.error(error);
+    async function checkSession() {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (!mounted) return;
+
+        if (error) console.error("[auth.getUser]", error);
+
+        const u = data?.user ?? null;
+        setUser(u);
+        setUserRole(u?.user_metadata?.rol || null);
+      } catch (err) {
+        console.error("[auth.getUser] Error inesperado", err);
+        if (!mounted) return;
+        setUser(null);
+        setUserRole(null);
+      } finally {
+        if (mounted) setChecking(false);
       }
-      const u = data?.user ?? null;
-      setUser(u);
-      const rol = u?.user_metadata?.rol || null;
-      setUserRole(rol);
-      setChecking(false);
-    });
+    }
 
-    // Listener de cambios de sesión (login / logout)
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+    checkSession();
+
+    try {
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
         const u = session?.user ?? null;
         setUser(u);
-        const rol = u?.user_metadata?.rol || null;
-        setUserRole(rol);
-      }
-    );
+        setUserRole(u?.user_metadata?.rol || null);
+        setChecking(false);
+      });
+      subscription = data?.subscription;
+    } catch (err) {
+      console.error("[auth.onAuthStateChange]", err);
+    }
 
     return () => {
       mounted = false;
-      listener.subscription.unsubscribe();
+      subscription?.unsubscribe?.();
     };
   }, []);
 
@@ -185,18 +194,14 @@ export default function App() {
     setErrorMsg("");
     setLoadingLogin(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         console.error(error);
-        setErrorMsg("Correo o contraseña incorrectos.");
+        setErrorMsg("Correo o contraseña incorrectos, o faltan variables de Supabase en Vercel.");
       }
-      // Si todo va bien, onAuthStateChange pondrá el user
     } catch (err) {
       console.error(err);
-      setErrorMsg("Error al iniciar sesión.");
+      setErrorMsg("Error al iniciar sesión. Revisa la consola o variables de Supabase.");
     } finally {
       setLoadingLogin(false);
     }
@@ -205,7 +210,6 @@ export default function App() {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      // listener limpiará user
     } catch (err) {
       console.error("Error al cerrar sesión", err);
     }
@@ -228,7 +232,6 @@ export default function App() {
     );
   }
 
-  // Si NO hay usuario => mostramos login con logo
   if (!user) {
     return (
       <LoginScreen
@@ -239,6 +242,5 @@ export default function App() {
     );
   }
 
-  // Si hay usuario => mostramos el POS
   return <PolleriaPOS rolSupabase={userRole} onLogout={handleLogout} />;
 }
